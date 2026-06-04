@@ -13,141 +13,142 @@
 
   <!-- HEADER & NAVIGATION -->
   <header
-    class="w-full max-w-6xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-stone-200">
+    class="w-full max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-stone-200/80">
     <div class="flex items-center gap-3">
-      <span class="text-2xl font-bold tracking-tight text-emerald-700">🌿 Oh Dites !</span>
+      <span class="text-2xl font-black tracking-tight text-emerald-700">🌿 Oh Dites !</span>
     </div>
-    <nav class="flex gap-6 text-sm font-medium text-stone-600">
-      <a href="index.html" class="text-emerald-700 hover:text-emerald-800 transition">Accueil</a>
-      <a href="charte.html" class="hover:text-emerald-700 transition">Charte & Valeurs</a>
-      <a href="audits.html" class="hover:text-emerald-700 transition">Les Audits (GÉT)</a>
-      <a href="fun.html" class="hover:text-emerald-700 transition">Espace F.U.N.</a>
+    <nav class="flex gap-8 text-sm font-semibold text-stone-600">
+      <a href="index.html" class="text-emerald-700 border-b-2 border-emerald-700 pb-1 transition">Accueil</a>
+      <a href="charte.html" class="hover:text-emerald-700 transition pb-1">Charte & Valeurs</a>
+      <a href="audits.html" class="hover:text-emerald-700 transition pb-1">Les Audits (GÉT)</a>
+      <a href="fun.html" class="hover:text-emerald-700 transition pb-1">Espace F.U.N.</a>
     </nav>
   </header>
 
   <!-- MAIN CONTENT -->
-  <main class="w-full max-w-4xl mx-auto px-6 py-12 flex-grow flex flex-col items-center justify-center text-center">
+  <main
+    class="w-full max-w-7xl mx-auto px-4 py-6 flex-grow flex flex-col items-center justify-center text-center gap-6">
 
-    <!-- INTRO -->
-    <div class="max-w-2xl mb-12">
-      <h1 class="text-4xl sm:text-5xl font-black text-stone-900 tracking-tight mb-4">
-        Comprendre avant de conclure.
+    <!-- INTRO CONDENSÉE POUR LAISSER LA PLACE À L'IMAGE -->
+    <div class="max-w-3xl px-2">
+      <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-stone-900 tracking-tight mb-3">
+        Comprendre avant de conclure.[cite: 1]
       </h1>
-      <p class="text-lg text-stone-600 leading-relaxed">
-        L’association ne vise pas à juger, dénoncer, convaincre ou orienter : elle vise à <span
-          class="font-semibold text-stone-900">documenter ce qui est</span>, afin que chacun puisse mieux comprendre et
-        décider.
+      <p class="text-base sm:text-lg text-stone-600 leading-relaxed max-w-2xl mx-auto">
+        L’association ne vise pas à juger ou convaincre : elle vise à <span
+          class="font-bold text-stone-900 border-b border-emerald-500/40">documenter factuellement ce qui est</span>,
+        afin que chacun puisse décider librement.[cite: 1, 3]
       </p>
     </div>
 
-    <!-- LOGO INTERACTIF CONTAINER -->
-    <!-- On utilise une position relative pour caler les zones cliquables par-dessus le logo -->
+    <!-- LOGO INTERACTIF FORMAT GÉANT -->
     <div
-      class="relative w-full max-w-[500px] aspect-square bg-white p-4 rounded-3xl shadow-md border border-stone-100 group">
+      class="relative w-full max-w-[800px] aspect-square bg-white p-4 sm:p-6 rounded-[2rem] shadow-2xl border border-stone-100 group transition-all duration-500 hover:shadow-emerald-900/5">
 
-      <!-- L'image de fond du logo d'origine -->
-      <img src="images/map.webp" alt="Oh Dites Logo" class="w-full h-full object-contain rounded-2xl">
+      <!-- L'image de fond du logo d'origine (prend 100% de l'espace) -->
+      <img src="images/map.webp" alt="Oh Dites Logo"
+        class="w-full h-full object-contain rounded-2xl select-none pointer-events-none">
 
-      <!-- CAPE TRANSPARENTE INTERACTIVE (GRID OVERLAY) -->
-      <!-- On découpe l'espace par-dessus le logo pour créer les zones de survol/clic -->
-      <div class="absolute inset-4 grid grid-cols-3 grid-rows-3 gap-2">
+      <!-- GRID OVERLAY INTERACTIF : Calé précisément sur la taille géante -->
+      <div class="absolute inset-4 sm:inset-6 grid grid-cols-3 grid-rows-3 gap-3 sm:gap-5">
 
-        <!-- 1. ZONE TOP-LEFT : Énergie & Transports -->
+        <!-- 1. TOP-LEFT : Énergie & Transports -->
         <a href="audits.html?domaine=energie"
-          class="relative flex items-center justify-center rounded-xl hover:bg-emerald-50/20 group/zone transition-all">
-          <!-- Tooltip dynamique au survol -->
+          class="relative flex items-center justify-center rounded-2xl hover:bg-emerald-500/5 group/zone transition-all duration-200 border border-transparent hover:border-emerald-500/10">
           <span
-            class="absolute bottom-full mb-2 hidden group-hover/zone:block bg-stone-900 text-white text-xs px-3 py-1.5 rounded shadow-lg whitespace-nowrap z-50">
-            ⚡ GÉT Énergies & Transports
+            class="absolute bottom-[105%] hidden group-hover/zone:block bg-stone-900/95 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow-2xl whitespace-nowrap backdrop-blur-sm z-50">
+            ⚡ GÉT Énergies & Transports[cite: 3]
           </span>
         </a>
 
-        <!-- 2. ZONE TOP-CENTER : Agriculture & Alimentation -->
+        <!-- 2. TOP-CENTER : Agriculture & Alimentation -->
         <a href="audits.html?domaine=agriculture"
-          class="relative flex items-center justify-center rounded-xl hover:bg-emerald-50/20 group/zone transition-all">
+          class="relative flex items-center justify-center rounded-2xl hover:bg-emerald-500/5 group/zone transition-all duration-200 border border-transparent hover:border-emerald-500/10">
           <span
-            class="absolute bottom-full mb-2 hidden group-hover/zone:block bg-stone-900 text-white text-xs px-3 py-1.5 rounded shadow-lg whitespace-nowrap z-50">
+            class="absolute bottom-[105%] hidden group-hover/zone:block bg-stone-900/95 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow-2xl whitespace-nowrap backdrop-blur-sm z-50">
             🌾 GÉT Agriculture & Résilience[cite: 2, 3]
           </span>
         </a>
 
-        <!-- 3. ZONE TOP-RIGHT : Santé & Environnement -->
+        <!-- 3. TOP-RIGHT : Santé & Environnement -->
         <a href="audits.html?domaine=sante"
-          class="relative flex items-center justify-center rounded-xl hover:bg-emerald-50/20 group/zone transition-all">
+          class="relative flex items-center justify-center rounded-2xl hover:bg-emerald-500/5 group/zone transition-all duration-200 border border-transparent hover:border-emerald-500/10">
           <span
-            class="absolute bottom-full mb-2 hidden group-hover/zone:block bg-stone-900 text-white text-xs px-3 py-1.5 rounded shadow-lg whitespace-nowrap z-50">
+            class="absolute bottom-[105%] hidden group-hover/zone:block bg-stone-900/95 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow-2xl whitespace-nowrap backdrop-blur-sm z-50">
             🩺 GÉT Santé & Environnement[cite: 3]
           </span>
         </a>
 
-        <!-- 4. ZONE MIDDLE-LEFT : Économie & Finance -->
+        <!-- 4. MIDDLE-LEFT : Économie & Finance -->
         <a href="audits.html?domaine=finance"
-          class="relative flex items-center justify-center rounded-xl hover:bg-emerald-50/20 group/zone transition-all">
+          class="relative flex items-center justify-center rounded-2xl hover:bg-emerald-500/5 group/zone transition-all duration-200 border border-transparent hover:border-emerald-500/10">
           <span
-            class="absolute right-full mr-2 hidden group-hover/zone:block bg-stone-900 text-white text-xs px-3 py-1.5 rounded shadow-lg whitespace-nowrap z-50">
+            class="absolute right-[105%] hidden group-hover/zone:block bg-stone-900/95 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow-2xl whitespace-nowrap backdrop-blur-sm z-50">
             📊 Économie & Finance Solidaire[cite: 2, 3]
           </span>
         </a>
 
-        <!-- 5. ZONE CENTER (Le Cerveau / Les Mains) : Qui sommes-nous -->
+        <!-- 5. ZONE CENTRALE (Le Cerveau / Les Mains) : L'Écosystème -->
         <a href="charte.html"
-          class="relative flex items-center justify-center rounded-full hover:bg-emerald-600/10 group/zone transition-all border-2 border-transparent hover:border-emerald-500/30">
+          class="relative flex items-center justify-center rounded-full hover:bg-emerald-600/10 group/zone transition-all border border-transparent hover:border-emerald-500/20 shadow-inner">
           <span
-            class="absolute bg-stone-900 text-white text-xs px-3 py-1.5 rounded shadow-lg whitespace-nowrap opacity-0 group-hover/zone:opacity-100 transition-opacity z-50">
+            class="absolute bg-stone-900/95 text-white text-xs sm:text-sm font-bold px-5 py-3 rounded-xl shadow-2xl whitespace-nowrap opacity-0 group-hover/zone:opacity-100 transition-opacity duration-200 backdrop-blur-sm z-50 border border-stone-800">
             🤝 L'Écosystème Oh Dites ![cite: 3]
           </span>
         </a>
 
-        <!-- 6. ZONE MIDDLE-RIGHT : Médias & Numérique -->
+        <!-- 6. MIDDLE-RIGHT : Médias & Numérique -->
         <a href="audits.html?domaine=numerique"
-          class="relative flex items-center justify-center rounded-xl hover:bg-emerald-50/20 group/zone transition-all">
+          class="relative flex items-center justify-center rounded-2xl hover:bg-emerald-500/5 group/zone transition-all duration-200 border border-transparent hover:border-emerald-500/10">
           <span
-            class="absolute left-full ml-2 hidden group-hover/zone:block bg-stone-900 text-white text-xs px-3 py-1.5 rounded shadow-lg whitespace-nowrap z-50">
+            class="absolute left-[105%] hidden group-hover/zone:block bg-stone-900/95 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow-2xl whitespace-nowrap backdrop-blur-sm z-50">
             💻 Médias & Numérique Factuel[cite: 3]
           </span>
         </a>
 
-        <!-- 7. ZONE BOTTOM-LEFT : Démocratie & Institutions -->
+        <!-- 7. BOTTOM-LEFT : Démocratie & Institutions -->
         <a href="audits.html?domaine=democratie"
-          class="relative flex items-center justify-center rounded-xl hover:bg-emerald-50/20 group/zone transition-all">
+          class="relative flex items-center justify-center rounded-2xl hover:bg-emerald-500/5 group/zone transition-all duration-200 border border-transparent hover:border-emerald-500/10">
           <span
-            class="absolute top-full mt-2 hidden group-hover/zone:block bg-stone-900 text-white text-xs px-3 py-1.5 rounded shadow-lg whitespace-nowrap z-50">
+            class="absolute top-[105%] hidden group-hover/zone:block bg-stone-900/95 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow-2xl whitespace-nowrap backdrop-blur-sm z-50">
             ⚖️ Démocratie & Institutions[cite: 3]
           </span>
         </a>
 
-        <!-- 8. ZONE BOTTOM-CENTER : Le Vivant -->
+        <!-- 8. BOTTOM-CENTER : Le Vivant -->
         <a href="charte.html#vivant"
-          class="relative flex items-center justify-center rounded-xl hover:bg-emerald-50/20 group/zone transition-all">
+          class="relative flex items-center justify-center rounded-2xl hover:bg-emerald-500/5 group/zone transition-all duration-200 border border-transparent hover:border-emerald-500/10">
           <span
-            class="absolute top-full mt-2 hidden group-hover/zone:block bg-stone-900 text-white text-xs px-3 py-1.5 rounded shadow-lg whitespace-nowrap z-50">
+            class="absolute top-[105%] hidden group-hover/zone:block bg-stone-900/95 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow-2xl whitespace-nowrap backdrop-blur-sm z-50">
             🌱 Respect & Préservation du Vivant[cite: 1, 2]
           </span>
         </a>
 
-        <!-- 9. ZONE BOTTOM-RIGHT : Rejoindre un GÉT -->
+        <!-- 9. BOTTOM-RIGHT : Rejoindre un GÉT -->
         <a href="audits.html#rejoindre"
-          class="relative flex items-center justify-center rounded-xl hover:bg-emerald-50/20 group/zone transition-all">
+          class="relative flex items-center justify-center rounded-2xl hover:bg-emerald-500/5 group/zone transition-all duration-200 border border-transparent hover:border-emerald-500/10">
           <span
-            class="absolute top-full mt-2 hidden group-hover/zone:block bg-stone-900 text-white text-xs px-3 py-1.5 rounded shadow-lg whitespace-nowrap z-50">
-            🚀 Lancer un Audit[cite: 3]
+            class="absolute top-[105%] hidden group-hover/zone:block bg-stone-900/95 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow-2xl whitespace-nowrap backdrop-blur-sm z-50">
+            🚀 Lancer un Nouvel Audit[cite: 3]
           </span>
         </a>
 
       </div>
     </div>
 
-    <!-- FOOTER ACCROCHE -->
-    <p class="mt-8 text-xs text-stone-400 uppercase tracking-widest font-semibold">
-      Un espace de compréhension, pas de combat[cite: 1]
+    <!-- PETITE ACCROCHE BASSE -->
+    <p class="text-xs text-stone-400 uppercase tracking-widest font-bold">
+      Les audits des citoyens lambda
     </p>
 
   </main>
 
   <!-- FOOTER -->
-  <footer class="w-full max-w-6xl mx-auto px-6 py-6 border-t border-stone-200 text-center text-xs text-stone-500">
-    &copy; 2026 Oh Dites ! — Licences de publication d'audits ouverts accordées à l'Association[cite: 3]. Adhérent
-    F.U.N[cite: 2].
+  <footer
+    class="w-full max-w-7xl mx-auto px-6 py-4 border-t border-stone-200/80 text-center text-xs text-stone-500 flex flex-col sm:flex-row items-center justify-between gap-2">
+    <div>&copy; 2026 Oh Dites ! — Espace de compréhension, pas de combat.[cite: 1]</div>
+    <div class="font-medium text-stone-400">Licence d'usage perpétuelle & gratuite accordée à l'Association[cite: 3] •
+      Projet adossé à la F.U.N[cite: 2]</div>
   </footer>
 
 </body>
