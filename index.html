@@ -27,12 +27,12 @@
 
   <!-- MAIN CONTENT -->
   <main
-    class="w-full max-w-7xl mx-auto px-4 py-6 flex-grow flex flex-col items-center justify-center text-center gap-6">
+    class="w-full max-w-7xl mx-auto px-4 py-8 flex-grow flex flex-col items-center justify-center text-center gap-8">
 
-    <!-- INTRO CONDENSÉE POUR LAISSER LA PLACE À L'IMAGE -->
+    <!-- INTRO -->
     <div class="max-w-3xl px-2">
       <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-stone-900 tracking-tight mb-3">
-        Comprendre avant de conclure.[cite: 1]
+        Comprendre avant de conclure.
       </h1>
       <p class="text-base sm:text-lg text-stone-600 leading-relaxed max-w-2xl mx-auto">
         L’association ne vise pas à juger ou convaincre : elle vise à <span
@@ -41,99 +41,144 @@
       </p>
     </div>
 
-    <!-- LOGO INTERACTIF FORMAT GÉANT -->
-    <div
-      class="relative w-full max-w-[800px] aspect-square bg-white p-4 sm:p-6 rounded-[2rem] shadow-2xl border border-stone-100 group transition-all duration-500 hover:shadow-emerald-900/5">
+    <!-- PANNEAU DE BOUTONS INTERACTIFS & RESPONSIVE -->
+    <!-- 1 colonne sur mobile, 3 colonnes à partir des tablettes/PC -->
+    <div class="w-full max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-6 px-4">
 
-      <!-- L'image de fond du logo d'origine (prend 100% de l'espace) -->
-      <img src="images/map.webp" alt="Oh Dites Logo"
-        class="w-full h-full object-contain rounded-2xl select-none pointer-events-none">
+      <!-- 1. BOUTON : Énergie & Transports -->
+      <a href="audits.html?domaine=energie"
+        class="group bg-white p-6 rounded-2xl border border-stone-200/60 shadow-sm hover:shadow-md hover:-translate-y-1 hover:scale-[1.02] hover:border-emerald-500/30 transition-all duration-300 flex flex-col items-center justify-center text-center gap-4">
+        <div
+          class="w-20 h-20 flex items-center justify-center bg-stone-50 rounded-xl group-hover:bg-emerald-50 transition-colors">
+          <img src="images/icone-energie.png" alt="⚡"
+            class="w-14 h-14 object-contain group-hover:scale-110 transition-transform">
+        </div>
+        <div>
+          <h3 class="font-bold text-stone-950 text-base">Énergies & Transports</h3>
+          <p class="text-xs text-stone-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-1">
+            Consulter l'audit[cite: 3]</p>
+        </div>
+      </a>
 
-      <!-- GRID OVERLAY INTERACTIF : Calé précisément sur la taille géante -->
-      <div class="absolute inset-4 sm:inset-6 grid grid-cols-3 grid-rows-3 gap-3 sm:gap-5">
+      <!-- 2. BOUTON : Agriculture & Alimentation -->
+      <a href="audits.html?domaine=agriculture"
+        class="group bg-white p-6 rounded-2xl border border-stone-200/60 shadow-sm hover:shadow-md hover:-translate-y-1 hover:scale-[1.02] hover:border-emerald-500/30 transition-all duration-300 flex flex-col items-center justify-center text-center gap-4">
+        <div
+          class="w-20 h-20 flex items-center justify-center bg-stone-50 rounded-xl group-hover:bg-emerald-50 transition-colors">
+          <img src="images/icone-agriculture.png" alt="🌾"
+            class="w-14 h-14 object-contain group-hover:scale-110 transition-transform">
+        </div>
+        <div>
+          <h3 class="font-bold text-stone-950 text-base">Agriculture & Résilience[cite: 2, 3]</h3>
+          <p class="text-xs text-stone-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-1">
+            Consulter l'audit[cite: 3]</p>
+        </div>
+      </a>
 
-        <!-- 1. TOP-LEFT : Énergie & Transports -->
-        <a href="audits.html?domaine=energie"
-          class="relative flex items-center justify-center rounded-2xl hover:bg-emerald-500/5 group/zone transition-all duration-200 border border-transparent hover:border-emerald-500/10">
-          <span
-            class="absolute bottom-[105%] hidden group-hover/zone:block bg-stone-900/95 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow-2xl whitespace-nowrap backdrop-blur-sm z-50">
-            ⚡ GÉT Énergies & Transports[cite: 3]
-          </span>
-        </a>
+      <!-- 3. BOUTON : Santé & Environnement -->
+      <a href="audits.html?domaine=sante"
+        class="group bg-white p-6 rounded-2xl border border-stone-200/60 shadow-sm hover:shadow-md hover:-translate-y-1 hover:scale-[1.02] hover:border-emerald-500/30 transition-all duration-300 flex flex-col items-center justify-center text-center gap-4">
+        <div
+          class="w-20 h-20 flex items-center justify-center bg-stone-50 rounded-xl group-hover:bg-emerald-50 transition-colors">
+          <img src="images/icone-sante.png" alt="🩺"
+            class="w-14 h-14 object-contain group-hover:scale-110 transition-transform">
+        </div>
+        <div>
+          <h3 class="font-bold text-stone-950 text-base">Santé & Environnement[cite: 3]</h3>
+          <p class="text-xs text-stone-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-1">
+            Consulter l'audit[cite: 3]</p>
+        </div>
+      </a>
 
-        <!-- 2. TOP-CENTER : Agriculture & Alimentation -->
-        <a href="audits.html?domaine=agriculture"
-          class="relative flex items-center justify-center rounded-2xl hover:bg-emerald-500/5 group/zone transition-all duration-200 border border-transparent hover:border-emerald-500/10">
-          <span
-            class="absolute bottom-[105%] hidden group-hover/zone:block bg-stone-900/95 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow-2xl whitespace-nowrap backdrop-blur-sm z-50">
-            🌾 GÉT Agriculture & Résilience[cite: 2, 3]
-          </span>
-        </a>
+      <!-- 4. BOUTON : Économie & Finance -->
+      <a href="audits.html?domaine=finance"
+        class="group bg-white p-6 rounded-2xl border border-stone-200/60 shadow-sm hover:shadow-md hover:-translate-y-1 hover:scale-[1.02] hover:border-emerald-500/30 transition-all duration-300 flex flex-col items-center justify-center text-center gap-4">
+        <div
+          class="w-20 h-20 flex items-center justify-center bg-stone-50 rounded-xl group-hover:bg-emerald-50 transition-colors">
+          <img src="images/icone-finance.png" alt="📊"
+            class="w-14 h-14 object-contain group-hover:scale-110 transition-transform">
+        </div>
+        <div>
+          <h3 class="font-bold text-stone-950 text-base">Économie & Finance[cite: 2, 3]</h3>
+          <p class="text-xs text-stone-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-1">
+            Consulter l'audit[cite: 3]</p>
+        </div>
+      </a>
 
-        <!-- 3. TOP-RIGHT : Santé & Environnement -->
-        <a href="audits.html?domaine=sante"
-          class="relative flex items-center justify-center rounded-2xl hover:bg-emerald-500/5 group/zone transition-all duration-200 border border-transparent hover:border-emerald-500/10">
-          <span
-            class="absolute bottom-[105%] hidden group-hover/zone:block bg-stone-900/95 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow-2xl whitespace-nowrap backdrop-blur-sm z-50">
-            🩺 GÉT Santé & Environnement[cite: 3]
-          </span>
-        </a>
+      <!-- 5. BOUTON CENTRAL : LE CERVEAU & LES MAINS (L'Écosystème) -->
+      <!-- Mis en valeur avec une couleur émeraude subtile -->
+      <a href="charte.html"
+        class="group bg-emerald-50/40 p-6 rounded-2xl border border-emerald-100 shadow-sm hover:shadow-emerald-900/10 hover:-translate-y-1 hover:scale-[1.02] hover:border-emerald-500/40 transition-all duration-300 flex flex-col items-center justify-center text-center gap-4">
+        <div
+          class="w-24 h-24 flex items-center justify-center bg-white rounded-full shadow-inner group-hover:scale-105 transition-transform duration-300">
+          <img src="images/cerveau-mains-relief.png" alt="🤝" class="w-16 h-16 object-contain">
+        </div>
+        <div>
+          <h3 class="font-black text-emerald-900 text-lg">L'Écosystème[cite: 3]</h3>
+          <p class="text-xs text-emerald-600 font-medium mt-1">Découvrir la Charte[cite: 1]</p>
+        </div>
+      </a>
 
-        <!-- 4. MIDDLE-LEFT : Économie & Finance -->
-        <a href="audits.html?domaine=finance"
-          class="relative flex items-center justify-center rounded-2xl hover:bg-emerald-500/5 group/zone transition-all duration-200 border border-transparent hover:border-emerald-500/10">
-          <span
-            class="absolute right-[105%] hidden group-hover/zone:block bg-stone-900/95 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow-2xl whitespace-nowrap backdrop-blur-sm z-50">
-            📊 Économie & Finance Solidaire[cite: 2, 3]
-          </span>
-        </a>
+      <!-- 6. BOUTON : Médias & Numérique -->
+      <a href="audits.html?domaine=numerique"
+        class="group bg-white p-6 rounded-2xl border border-stone-200/60 shadow-sm hover:shadow-md hover:-translate-y-1 hover:scale-[1.02] hover:border-emerald-500/30 transition-all duration-300 flex flex-col items-center justify-center text-center gap-4">
+        <div
+          class="w-20 h-20 flex items-center justify-center bg-stone-50 rounded-xl group-hover:bg-emerald-50 transition-colors">
+          <img src="images/icone-numerique.png" alt="💻"
+            class="w-14 h-14 object-contain group-hover:scale-110 transition-transform">
+        </div>
+        <div>
+          <h3 class="font-bold text-stone-950 text-base">Médias & Numérique[cite: 3]</h3>
+          <p class="text-xs text-stone-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-1">
+            Consulter l'audit[cite: 3]</p>
+        </div>
+      </a>
 
-        <!-- 5. ZONE CENTRALE (Le Cerveau / Les Mains) : L'Écosystème -->
-        <a href="charte.html"
-          class="relative flex items-center justify-center rounded-full hover:bg-emerald-600/10 group/zone transition-all border border-transparent hover:border-emerald-500/20 shadow-inner">
-          <span
-            class="absolute bg-stone-900/95 text-white text-xs sm:text-sm font-bold px-5 py-3 rounded-xl shadow-2xl whitespace-nowrap opacity-0 group-hover/zone:opacity-100 transition-opacity duration-200 backdrop-blur-sm z-50 border border-stone-800">
-            🤝 L'Écosystème Oh Dites ![cite: 3]
-          </span>
-        </a>
+      <!-- 7. BOUTON : Démocratie & Institutions -->
+      <a href="audits.html?domaine=democratie"
+        class="group bg-white p-6 rounded-2xl border border-stone-200/60 shadow-sm hover:shadow-md hover:-translate-y-1 hover:scale-[1.02] hover:border-emerald-500/30 transition-all duration-300 flex flex-col items-center justify-center text-center gap-4">
+        <div
+          class="w-20 h-20 flex items-center justify-center bg-stone-50 rounded-xl group-hover:bg-emerald-50 transition-colors">
+          <img src="images/icone-democratie.png" alt="⚖️"
+            class="w-14 h-14 object-contain group-hover:scale-110 transition-transform">
+        </div>
+        <div>
+          <h3 class="font-bold text-stone-950 text-base">Démocratie & Institutions[cite: 3]</h3>
+          <p class="text-xs text-stone-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-1">
+            Consulter l'audit[cite: 3]</p>
+        </div>
+      </a>
 
-        <!-- 6. MIDDLE-RIGHT : Médias & Numérique -->
-        <a href="audits.html?domaine=numerique"
-          class="relative flex items-center justify-center rounded-2xl hover:bg-emerald-500/5 group/zone transition-all duration-200 border border-transparent hover:border-emerald-500/10">
-          <span
-            class="absolute left-[105%] hidden group-hover/zone:block bg-stone-900/95 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow-2xl whitespace-nowrap backdrop-blur-sm z-50">
-            💻 Médias & Numérique Factuel[cite: 3]
-          </span>
-        </a>
+      <!-- 8. BOUTON : Le Vivant -->
+      <a href="charte.html#vivant"
+        class="group bg-white p-6 rounded-2xl border border-stone-200/60 shadow-sm hover:shadow-md hover:-translate-y-1 hover:scale-[1.02] hover:border-emerald-500/30 transition-all duration-300 flex flex-col items-center justify-center text-center gap-4">
+        <div
+          class="w-20 h-20 flex items-center justify-center bg-stone-50 rounded-xl group-hover:bg-emerald-50 transition-colors">
+          <img src="images/icone-vivant.png" alt="🌱"
+            class="w-14 h-14 object-contain group-hover:scale-110 transition-transform">
+        </div>
+        <div>
+          <h3 class="font-bold text-stone-950 text-base">Préservation du Vivant[cite: 1, 2]</h3>
+          <p class="text-xs text-stone-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-1">Notre
+            engagement[cite: 1, 2]</p>
+        </div>
+      </a>
 
-        <!-- 7. BOTTOM-LEFT : Démocratie & Institutions -->
-        <a href="audits.html?domaine=democratie"
-          class="relative flex items-center justify-center rounded-2xl hover:bg-emerald-500/5 group/zone transition-all duration-200 border border-transparent hover:border-emerald-500/10">
-          <span
-            class="absolute top-[105%] hidden group-hover/zone:block bg-stone-900/95 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow-2xl whitespace-nowrap backdrop-blur-sm z-50">
-            ⚖️ Démocratie & Institutions[cite: 3]
-          </span>
-        </a>
+      <!-- 9. BOUTON : Lancer un Audit -->
+      <a href="audits.html#rejoindre"
+        class="group bg-white p-6 rounded-2xl border border-stone-200/60 shadow-sm hover:shadow-md hover:-translate-y-1 hover:scale-[1.02] hover:border-emerald-500/30 transition-all duration-300 flex flex-col items-center justify-center text-center gap-4">
+        <div
+          class="w-20 h-20 flex items-center justify-center bg-stone-50 rounded-xl group-hover:bg-emerald-50 transition-colors">
+          <img src="images/icone-plus.png" alt="🚀"
+            class="w-14 h-14 object-contain group-hover:scale-110 transition-transform">
+        </div>
+        <div>
+          <h3 class="font-bold text-stone-950 text-base">Rejoindre / Créer un GÉT[cite: 3]</h3>
+          <p class="text-xs text-stone-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-1">
+            Participer à l'audit[cite: 3]</p>
+        </div>
+      </a>
 
-        <!-- 8. BOTTOM-CENTER : Le Vivant -->
-        <a href="charte.html#vivant"
-          class="relative flex items-center justify-center rounded-2xl hover:bg-emerald-500/5 group/zone transition-all duration-200 border border-transparent hover:border-emerald-500/10">
-          <span
-            class="absolute top-[105%] hidden group-hover/zone:block bg-stone-900/95 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow-2xl whitespace-nowrap backdrop-blur-sm z-50">
-            🌱 Respect & Préservation du Vivant[cite: 1, 2]
-          </span>
-        </a>
-
-        <!-- 9. BOTTOM-RIGHT : Rejoindre un GÉT -->
-        <a href="audits.html#rejoindre"
-          class="relative flex items-center justify-center rounded-2xl hover:bg-emerald-500/5 group/zone transition-all duration-200 border border-transparent hover:border-emerald-500/10">
-          <span
-            class="absolute top-[105%] hidden group-hover/zone:block bg-stone-900/95 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow-2xl whitespace-nowrap backdrop-blur-sm z-50">
-            🚀 Lancer un Nouvel Audit[cite: 3]
-          </span>
-        </a>
-
-      </div>
     </div>
 
     <!-- PETITE ACCROCHE BASSE -->
@@ -147,8 +192,9 @@
   <footer
     class="w-full max-w-7xl mx-auto px-6 py-4 border-t border-stone-200/80 text-center text-xs text-stone-500 flex flex-col sm:flex-row items-center justify-between gap-2">
     <div>&copy; 2026 Oh Dites ! — Espace de compréhension, pas de combat.[cite: 1]</div>
-    <div class="font-medium text-stone-400">Licence d'usage perpétuelle & gratuite accordée à l'Association[cite: 3] •
-      Projet adossé à la F.U.N[cite: 2]</div>
+    <div class="font-medium text-stone-400">
+      Licence d'usage perpétuelle & gratuite accordée à l'Association[cite: 3] • Projet adossé à la F.U.N.[cite: 2]
+    </div>
   </footer>
 
 </body>
