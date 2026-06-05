@@ -27,7 +27,7 @@
 
   <!-- MAIN CONTENT -->
   <main
-    class="w-full max-w-7xl mx-auto px-4 py-8 flex-grow flex flex-col items-center justify-center text-center gap-12">
+    class="w-full max-w-7xl mx-auto px-4 py-8 flex-grow flex flex-col items-center justify-center text-center gap-8">
 
     <!-- INTRO -->
     <div class="max-w-3xl px-2">
@@ -41,138 +41,132 @@
       </p>
     </div>
 
-    <!-- CONSTELLATION D'ICÔNES FLOTTANTES (RESPONSIVE) -->
-    <!-- Grille de 3 colonnes sur PC/Tablette, s'empile proprement sur mobile sans aucune boîte/card -->
-    <div class="w-full max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-y-12 gap-x-6 items-center px-4">
+    <!-- CONSTELLATION EN ARC DE CERCLE (CONFORME À L'IMAGE) -->
+    <!-- Le conteneur fait 550px de large sur grand écran pour étaler les icônes en cercle parfait -->
+    <div class="relative w-[340px] h-[340px] sm:w-[550px] sm:h-[550px] flex items-center justify-center my-8">
 
-      <!-- COLONNE GAUCHE (Thèmes 1 à 3) -->
-      <div class="flex flex-col gap-12 justify-center items-center sm:items-end">
-
-        <!-- 1. Énergies -->
-        <a href="audits.html?domaine=energie"
-          class="group relative flex flex-col items-center sm:items-end gap-2 transition-all duration-300 hover:-translate-y-1">
-          <img src="images/icone-energie.webp" alt="⚡"
-            class="w-20 h-20 object-contain transition-transform duration-300 group-hover:scale-110 select-none pointer-events-none">
-          <span
-            class="sm:absolute sm:right-24 sm:top-7 bg-stone-900 text-white text-sm font-semibold px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
-            ⚡ Énergies
-          </span>
-        </a>
-
-        <!-- 2. Transports -->
-        <a href="audits.html?domaine=transports"
-          class="group relative flex flex-col items-center sm:items-end gap-2 transition-all duration-300 hover:-translate-y-1">
-          <img src="images/icone-transport.webp" alt="🚗"
-            class="w-20 h-20 object-contain transition-transform duration-300 group-hover:scale-110 select-none pointer-events-none">
-          <span
-            class="sm:absolute sm:right-24 sm:top-7 bg-stone-900 text-white text-sm font-semibold px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
-            🚗 Transports[cite: 3]
-          </span>
-        </a>
-
-        <!-- 3. Agriculture & Alimentation -->
-        <a href="audits.html?domaine=agriculture"
-          class="group relative flex flex-col items-center sm:items-end gap-2 transition-all duration-300 hover:-translate-y-1">
-          <img src="images/icone-agriculture.webp" alt="🌾"
-            class="w-20 h-20 object-contain transition-transform duration-300 group-hover:scale-110 select-none pointer-events-none">
-          <span
-            class="sm:absolute sm:right-24 sm:top-7 bg-stone-900 text-white text-sm font-semibold px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
-            🌾 Agriculture & Résilience[cite: 2, 3]
-          </span>
-        </a>
-
-        <!-- 4. Santé & Environnement -->
-        <a href="audits.html?domaine=sante"
-          class="group relative flex flex-col items-center sm:items-end gap-2 transition-all duration-300 hover:-translate-y-1">
-          <img src="images/icone-sante.webp" alt="🩺"
-            class="w-20 h-20 object-contain transition-transform duration-300 group-hover:scale-110 select-none pointer-events-none">
-          <span
-            class="sm:absolute sm:right-24 sm:top-7 bg-stone-900 text-white text-sm font-semibold px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
-            🩺 Santé & Environnement[cite: 3]
-          </span>
-        </a>
-      </div>
-
-      <!-- COLONNE CENTRALE : LE GROS CERVEAU TRANSPARENT EN RELIEF -->
-      <div class="flex justify-center items-center py-6 sm:py-0">
+      <!-- IMAGE CENTRALE : LE GROS CERVEAU TRANSPARENT EN RELIEF -->
+      <div class="absolute w-36 h-36 sm:w-60 sm:h-60 flex items-center justify-center z-10">
         <a href="charte.html"
           class="group relative flex flex-col items-center transition-all duration-500 hover:scale-105">
-          <!-- Arrière-plan halo vert très léger au survol de l'icône centrale -->
           <div
             class="absolute inset-0 bg-emerald-500/5 rounded-full filter blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
           </div>
           <img src="images/cerveau-mains-relief.webp" alt="🤝"
-            class="w-44 h-44 sm:w-56 sm:h-56 object-contain relative z-10 select-none pointer-events-none">
+            class="w-full h-full object-contain select-none pointer-events-none">
           <span
-            class="absolute top-[105%] bg-emerald-800 text-white text-sm font-bold px-4 py-2 rounded-xl shadow-xl whitespace-nowrap opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50">
-            🤝 L'Écosystème Oh Dites ![cite: 3]
+            class="absolute top-[105%] bg-emerald-800 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50">
+            🤝 L'Écosystème Oh Dites !
           </span>
         </a>
       </div>
 
-      <!-- COLONNE DROITE (Thèmes 5 à 9) -->
-      <div class="flex flex-col gap-12 justify-center items-center sm:items-start">
+      <!-- LES 9 ICÔNES EN COURONNE CIRCULAIRE (Positions calculées de 0° à 360°) -->
+      <!-- Sur mobile, l'arc s'ajuste proportionnellement grâce aux modificateurs sm: -->
 
-        <!-- 5. Économie & Finance -->
-        <a href="audits.html?domaine=finance"
-          class="group relative flex flex-col items-center sm:items-start gap-2 transition-all duration-300 hover:-translate-y-1">
-          <img src="images/icone-finance.webp" alt="📊"
-            class="w-20 h-20 object-contain transition-transform duration-300 group-hover:scale-110 select-none pointer-events-none">
-          <span
-            class="sm:absolute sm:left-24 sm:top-7 bg-stone-900 text-white text-sm font-semibold px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
-            📊 Économie & Finance[cite: 2, 3]
-          </span>
-        </a>
+      <!-- 1. Énergies (Haut - 0°) -->
+      <a href="audits.html?domaine=energie"
+        class="absolute group flex flex-col items-center transition-all duration-300 hover:scale-110 -translate-y-[130px] sm:-translate-y-[220px] z-20">
+        <img src="images/icone-energie.webp" alt="⚡"
+          class="w-14 h-14 sm:w-20 sm:h-20 object-contain select-none pointer-events-none">
+        <span
+          class="absolute bottom-full mb-2 bg-stone-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+          ⚡ Énergies
+        </span>
+      </a>
 
-        <!-- 6. Médias & Numérique -->
-        <a href="audits.html?domaine=numerique"
-          class="group relative flex flex-col items-center sm:items-start gap-2 transition-all duration-300 hover:-translate-y-1">
-          <img src="images/icone-numerique.webp" alt="💻"
-            class="w-20 h-20 object-contain transition-transform duration-300 group-hover:scale-110 select-none pointer-events-none">
-          <span
-            class="sm:absolute sm:left-24 sm:top-7 bg-stone-900 text-white text-sm font-semibold px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
-            💻 Médias & Numérique[cite: 3]
-          </span>
-        </a>
+      <!-- 2. Transports (40°) -->
+      <a href="audits.html?domaine=transports"
+        class="absolute group flex flex-col items-center transition-all duration-300 hover:scale-110 translate-x-[83px] -translate-y-[100px] sm:translate-x-[141px] sm:-translate-y-[169px] z-20">
+        <img src="images/icone-transport.webp" alt="🚗"
+          class="w-14 h-14 sm:w-20 sm:h-20 object-contain select-none pointer-events-none">
+        <span
+          class="absolute bottom-full mb-2 bg-stone-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+          🚗 Transports
+        </span>
+      </a>
 
-        <!-- 7. Démocratie & Institutions -->
-        <a href="audits.html?domaine=democratie"
-          class="group relative flex flex-col items-center sm:items-start gap-2 transition-all duration-300 hover:-translate-y-1">
-          <img src="images/icone-democratie.webp" alt="⚖️"
-            class="w-20 h-20 object-contain transition-transform duration-300 group-hover:scale-110 select-none pointer-events-none">
-          <span
-            class="sm:absolute sm:left-24 sm:top-7 bg-stone-900 text-white text-sm font-semibold px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
-            ⚖️ Démocratie & Institutions[cite: 3]
-          </span>
-        </a>
+      <!-- 3. Agriculture & Résilience (80°) -->
+      <a href="audits.html?domaine=agriculture"
+        class="absolute group flex flex-col items-center transition-all duration-300 hover:scale-110 translate-x-[128px] -translate-y-[22px] sm:translate-x-[216px] sm:-translate-y-[38px] z-20">
+        <img src="images/icone-agriculture.webp" alt="🌾"
+          class="w-14 h-14 sm:w-20 sm:h-20 object-contain select-none pointer-events-none">
+        <span
+          class="absolute bottom-full mb-2 bg-stone-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+          🌾 Agriculture & Résilience
+        </span>
+      </a>
 
-        <!-- 8. Organisations publiques & privées -->
-        <a href="audits.html?domaine=organisations"
-          class="group relative flex flex-col items-center sm:items-start gap-2 transition-all duration-300 hover:-translate-y-1">
-          <img src="images/icone-organisations.webp" alt="🏢"
-            class="w-20 h-20 object-contain transition-transform duration-300 group-hover:scale-110 select-none pointer-events-none">
-          <span
-            class="sm:absolute sm:left-24 sm:top-7 bg-stone-900 text-white text-sm font-semibold px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
-            🏢 Organisations Publiques[cite: 3]
-          </span>
-        </a>
+      <!-- 4. Santé & Environnement (120°) -->
+      <a href="audits.html?domaine=sante"
+        class="absolute group flex flex-col items-center transition-all duration-300 hover:scale-110 translate-x-[112px] translate-y-[65px] sm:translate-x-[190px] sm:translate-y-[110px] z-20">
+        <img src="images/icone-sante.webp" alt="🩺"
+          class="w-14 h-14 sm:w-20 sm:h-20 object-contain select-none pointer-events-none">
+        <span
+          class="absolute bottom-full mb-2 bg-stone-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+          🩺 Santé & Environnement
+        </span>
+      </a>
 
-        <!-- 9. Le Vivant & Nouveau GÉT -->
-        <a href="audits.html#rejoindre"
-          class="group relative flex flex-col items-center sm:items-start gap-2 transition-all duration-300 hover:-translate-y-1">
-          <img src="images/icone-vivant.webp" alt="🌱"
-            class="w-20 h-20 object-contain transition-transform duration-300 group-hover:scale-110 select-none pointer-events-none">
-          <span
-            class="sm:absolute sm:left-24 sm:top-7 bg-stone-900 text-white text-sm font-semibold px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
-            🌱 Préservation du Vivant & GÉT[cite: 1, 2, 3]
-          </span>
-        </a>
-      </div>
+      <!-- 5. Économie & Finance (160°) -->
+      <a href="audits.html?domaine=finance"
+        class="absolute group flex flex-col items-center transition-all duration-300 hover:scale-110 translate-x-[44px] translate-y-[122px] sm:translate-x-[75px] sm:translate-y-[206px] z-20">
+        <img src="images/icone-finance.webp" alt="📊"
+          class="w-14 h-14 sm:w-20 sm:h-20 object-contain select-none pointer-events-none">
+        <span
+          class="absolute top-full mt-2 bg-stone-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+          📊 Économie & Finance
+        </span>
+      </a>
+
+      <!-- 6. Médias & Numérique (200°) -->
+      <a href="audits.html?domaine=numerique"
+        class="absolute group flex flex-col items-center transition-all duration-300 hover:scale-110 -translate-x-[44px] translate-y-[122px] sm:-translate-x-[75px] sm:translate-y-[206px] z-20">
+        <img src="images/icone-numerique.webp" alt="💻"
+          class="w-14 h-14 sm:w-20 sm:h-20 object-contain select-none pointer-events-none">
+        <span
+          class="absolute top-full mt-2 bg-stone-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+          💻 Médias & Numérique
+        </span>
+      </a>
+
+      <!-- 7. Démocratie & Institutions (240°) -->
+      <a href="audits.html?domaine=democratie"
+        class="absolute group flex flex-col items-center transition-all duration-300 hover:scale-110 -translate-x-[112px] translate-y-[65px] sm:-translate-x-[190px] sm:translate-y-[110px] z-20">
+        <img src="images/icone-democratie.webp" alt="⚖️"
+          class="w-14 h-14 sm:w-20 sm:h-20 object-contain select-none pointer-events-none">
+        <span
+          class="absolute top-full mt-2 bg-stone-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+          ⚖️ Démocratie & Institutions
+        </span>
+      </a>
+
+      <!-- 8. Organisations publiques (280°) -->
+      <a href="audits.html?domaine=organisations"
+        class="absolute group flex flex-col items-center transition-all duration-300 hover:scale-110 -translate-x-[128px] -translate-y-[22px] sm:-translate-x-[216px] sm:-translate-y-[38px] z-20">
+        <img src="images/icone-organisations.webp" alt="🏢"
+          class="w-14 h-14 sm:w-20 sm:h-20 object-contain select-none pointer-events-none">
+        <span
+          class="absolute bottom-full mb-2 bg-stone-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+          🏢 Organisations Publiques
+        </span>
+      </a>
+
+      <!-- 9. Préservation du Vivant (320°) -->
+      <a href="audits.html#rejoindre"
+        class="absolute group flex flex-col items-center transition-all duration-300 hover:scale-110 -translate-x-[83px] -translate-y-[100px] sm:-translate-x-[141px] sm:-translate-y-[169px] z-20">
+        <img src="images/icone-vivant.webp" alt="🌱"
+          class="w-14 h-14 sm:w-20 sm:h-20 object-contain select-none pointer-events-none">
+        <span
+          class="absolute bottom-full mb-2 bg-stone-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+          🌱 Préservation du Vivant
+        </span>
+      </a>
 
     </div>
 
     <!-- PETITE ACCROCHE BASSE -->
-    <p class="text-xs text-stone-400 uppercase tracking-widest font-bold mt-4">
+    <p class="text-xs text-stone-400 uppercase tracking-widest font-bold">
       Les audits des citoyens lambda
     </p>
 
