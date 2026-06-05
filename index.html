@@ -27,12 +27,12 @@
 
   <!-- MAIN CONTENT -->
   <main
-    class="w-full max-w-7xl mx-auto px-4 py-8 flex-grow flex flex-col items-center justify-center text-center gap-8">
+    class="w-full max-w-7xl mx-auto px-4 py-8 flex-grow flex flex-col items-center justify-center text-center gap-12">
 
     <!-- INTRO -->
     <div class="max-w-3xl px-2">
       <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-stone-900 tracking-tight mb-3">
-        Comprendre avant de conclure.
+        Comprendre avant de conclure.[cite: 1]
       </h1>
       <p class="text-base sm:text-lg text-stone-600 leading-relaxed max-w-2xl mx-auto">
         L’association ne vise pas à juger ou convaincre : elle vise à <span
@@ -41,147 +41,138 @@
       </p>
     </div>
 
-    <!-- PANNEAU DE BOUTONS INTERACTIFS & RESPONSIVE -->
-    <!-- 1 colonne sur mobile, 3 colonnes à partir des tablettes/PC -->
-    <div class="w-full max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-6 px-4">
+    <!-- CONSTELLATION D'ICÔNES FLOTTANTES (RESPONSIVE) -->
+    <!-- Grille de 3 colonnes sur PC/Tablette, s'empile proprement sur mobile sans aucune boîte/card -->
+    <div class="w-full max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-y-12 gap-x-6 items-center px-4">
 
-      <!-- 1. BOUTON : Énergie & Transports -->
-      <a href="audits.html?domaine=energie"
-        class="group bg-white p-6 rounded-2xl border border-stone-200/60 shadow-sm hover:shadow-md hover:-translate-y-1 hover:scale-[1.02] hover:border-emerald-500/30 transition-all duration-300 flex flex-col items-center justify-center text-center gap-4">
-        <div
-          class="w-20 h-20 flex items-center justify-center bg-stone-50 rounded-xl group-hover:bg-emerald-50 transition-colors">
+      <!-- COLONNE GAUCHE (Thèmes 1 à 3) -->
+      <div class="flex flex-col gap-12 justify-center items-center sm:items-end">
+
+        <!-- 1. Énergies -->
+        <a href="audits.html?domaine=energie"
+          class="group relative flex flex-col items-center sm:items-end gap-2 transition-all duration-300 hover:-translate-y-1">
           <img src="images/icone-energie.webp" alt="⚡"
-            class="w-14 h-14 object-contain group-hover:scale-110 transition-transform">
-        </div>
-        <div>
-          <h3 class="font-bold text-stone-950 text-base">Énergies & Transports</h3>
-          <p class="text-xs text-stone-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-1">
-            Consulter l'audit</p>
-        </div>
-      </a>
+            class="w-20 h-20 object-contain transition-transform duration-300 group-hover:scale-110 select-none pointer-events-none">
+          <span
+            class="sm:absolute sm:right-24 sm:top-7 bg-stone-900 text-white text-sm font-semibold px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+            ⚡ Énergies
+          </span>
+        </a>
 
-      <!-- 2. BOUTON : Agriculture & Alimentation -->
-      <a href="audits.html?domaine=agriculture"
-        class="group bg-white p-6 rounded-2xl border border-stone-200/60 shadow-sm hover:shadow-md hover:-translate-y-1 hover:scale-[1.02] hover:border-emerald-500/30 transition-all duration-300 flex flex-col items-center justify-center text-center gap-4">
-        <div
-          class="w-20 h-20 flex items-center justify-center bg-stone-50 rounded-xl group-hover:bg-emerald-50 transition-colors">
+        <!-- 2. Transports -->
+        <a href="audits.html?domaine=transports"
+          class="group relative flex flex-col items-center sm:items-end gap-2 transition-all duration-300 hover:-translate-y-1">
+          <img src="images/icone-transport.webp" alt="🚗"
+            class="w-20 h-20 object-contain transition-transform duration-300 group-hover:scale-110 select-none pointer-events-none">
+          <span
+            class="sm:absolute sm:right-24 sm:top-7 bg-stone-900 text-white text-sm font-semibold px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+            🚗 Transports[cite: 3]
+          </span>
+        </a>
+
+        <!-- 3. Agriculture & Alimentation -->
+        <a href="audits.html?domaine=agriculture"
+          class="group relative flex flex-col items-center sm:items-end gap-2 transition-all duration-300 hover:-translate-y-1">
           <img src="images/icone-agriculture.webp" alt="🌾"
-            class="w-14 h-14 object-contain group-hover:scale-110 transition-transform">
-        </div>
-        <div>
-          <h3 class="font-bold text-stone-950 text-base">Agriculture & Résilience</h3>
-          <p class="text-xs text-stone-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-1">
-            Consulter l'audit</p>
-        </div>
-      </a>
+            class="w-20 h-20 object-contain transition-transform duration-300 group-hover:scale-110 select-none pointer-events-none">
+          <span
+            class="sm:absolute sm:right-24 sm:top-7 bg-stone-900 text-white text-sm font-semibold px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+            🌾 Agriculture & Résilience[cite: 2, 3]
+          </span>
+        </a>
 
-      <!-- 3. BOUTON : Santé & Environnement -->
-      <a href="audits.html?domaine=sante"
-        class="group bg-white p-6 rounded-2xl border border-stone-200/60 shadow-sm hover:shadow-md hover:-translate-y-1 hover:scale-[1.02] hover:border-emerald-500/30 transition-all duration-300 flex flex-col items-center justify-center text-center gap-4">
-        <div
-          class="w-20 h-20 flex items-center justify-center bg-stone-50 rounded-xl group-hover:bg-emerald-50 transition-colors">
+        <!-- 4. Santé & Environnement -->
+        <a href="audits.html?domaine=sante"
+          class="group relative flex flex-col items-center sm:items-end gap-2 transition-all duration-300 hover:-translate-y-1">
           <img src="images/icone-sante.webp" alt="🩺"
-            class="w-14 h-14 object-contain group-hover:scale-110 transition-transform">
-        </div>
-        <div>
-          <h3 class="font-bold text-stone-950 text-base">Santé & Environnement</h3>
-          <p class="text-xs text-stone-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-1">
-            Consulter l'audit</p>
-        </div>
-      </a>
+            class="w-20 h-20 object-contain transition-transform duration-300 group-hover:scale-110 select-none pointer-events-none">
+          <span
+            class="sm:absolute sm:right-24 sm:top-7 bg-stone-900 text-white text-sm font-semibold px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+            🩺 Santé & Environnement[cite: 3]
+          </span>
+        </a>
+      </div>
 
-      <!-- 4. BOUTON : Économie & Finance -->
-      <a href="audits.html?domaine=finance"
-        class="group bg-white p-6 rounded-2xl border border-stone-200/60 shadow-sm hover:shadow-md hover:-translate-y-1 hover:scale-[1.02] hover:border-emerald-500/30 transition-all duration-300 flex flex-col items-center justify-center text-center gap-4">
-        <div
-          class="w-20 h-20 flex items-center justify-center bg-stone-50 rounded-xl group-hover:bg-emerald-50 transition-colors">
+      <!-- COLONNE CENTRALE : LE GROS CERVEAU TRANSPARENT EN RELIEF -->
+      <div class="flex justify-center items-center py-6 sm:py-0">
+        <a href="charte.html"
+          class="group relative flex flex-col items-center transition-all duration-500 hover:scale-105">
+          <!-- Arrière-plan halo vert très léger au survol de l'icône centrale -->
+          <div
+            class="absolute inset-0 bg-emerald-500/5 rounded-full filter blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+          </div>
+          <img src="images/cerveau-mains-relief.webp" alt="🤝"
+            class="w-44 h-44 sm:w-56 sm:h-56 object-contain relative z-10 select-none pointer-events-none">
+          <span
+            class="absolute top-[105%] bg-emerald-800 text-white text-sm font-bold px-4 py-2 rounded-xl shadow-xl whitespace-nowrap opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50">
+            🤝 L'Écosystème Oh Dites ![cite: 3]
+          </span>
+        </a>
+      </div>
+
+      <!-- COLONNE DROITE (Thèmes 5 à 9) -->
+      <div class="flex flex-col gap-12 justify-center items-center sm:items-start">
+
+        <!-- 5. Économie & Finance -->
+        <a href="audits.html?domaine=finance"
+          class="group relative flex flex-col items-center sm:items-start gap-2 transition-all duration-300 hover:-translate-y-1">
           <img src="images/icone-finance.webp" alt="📊"
-            class="w-14 h-14 object-contain group-hover:scale-110 transition-transform">
-        </div>
-        <div>
-          <h3 class="font-bold text-stone-950 text-base">Économie & Finance</h3>
-          <p class="text-xs text-stone-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-1">
-            Consulter l'audit</p>
-        </div>
-      </a>
+            class="w-20 h-20 object-contain transition-transform duration-300 group-hover:scale-110 select-none pointer-events-none">
+          <span
+            class="sm:absolute sm:left-24 sm:top-7 bg-stone-900 text-white text-sm font-semibold px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+            📊 Économie & Finance[cite: 2, 3]
+          </span>
+        </a>
 
-      <!-- 5. BOUTON CENTRAL : LE CERVEAU & LES MAINS (L'Écosystème) -->
-      <a href="charte.html"
-        class="group bg-emerald-50/40 p-6 rounded-2xl border border-emerald-100 shadow-sm hover:shadow-emerald-900/10 hover:-translate-y-1 hover:scale-[1.02] hover:border-emerald-500/40 transition-all duration-300 flex flex-col items-center justify-center text-center gap-4">
-        <div
-          class="w-24 h-24 flex items-center justify-center bg-white rounded-full shadow-inner group-hover:scale-105 transition-transform duration-300">
-          <img src="images/cerveau-mains-relief.webp" alt="🤝" class="w-16 h-16 object-contain">
-        </div>
-        <div>
-          <h3 class="font-black text-emerald-900 text-lg">L'Écosystème</h3>
-          <p class="text-xs text-emerald-600 font-medium mt-1">Découvrir la Charte[cite: 1]</p>
-        </div>
-      </a>
-
-      <!-- 6. BOUTON : Médias & Numérique -->
-      <a href="audits.html?domaine=numerique"
-        class="group bg-white p-6 rounded-2xl border border-stone-200/60 shadow-sm hover:shadow-md hover:-translate-y-1 hover:scale-[1.02] hover:border-emerald-500/30 transition-all duration-300 flex flex-col items-center justify-center text-center gap-4">
-        <div
-          class="w-20 h-20 flex items-center justify-center bg-stone-50 rounded-xl group-hover:bg-emerald-50 transition-colors">
+        <!-- 6. Médias & Numérique -->
+        <a href="audits.html?domaine=numerique"
+          class="group relative flex flex-col items-center sm:items-start gap-2 transition-all duration-300 hover:-translate-y-1">
           <img src="images/icone-numerique.webp" alt="💻"
-            class="w-14 h-14 object-contain group-hover:scale-110 transition-transform">
-        </div>
-        <div>
-          <h3 class="font-bold text-stone-950 text-base">Médias & Numérique[cite: 3]</h3>
-          <p class="text-xs text-stone-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-1">
-            Consulter l'audit[cite: 3]</p>
-        </div>
-      </a>
+            class="w-20 h-20 object-contain transition-transform duration-300 group-hover:scale-110 select-none pointer-events-none">
+          <span
+            class="sm:absolute sm:left-24 sm:top-7 bg-stone-900 text-white text-sm font-semibold px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+            💻 Médias & Numérique[cite: 3]
+          </span>
+        </a>
 
-      <!-- 7. BOUTON : Démocratie & Institutions -->
-      <a href="audits.html?domaine=democratie"
-        class="group bg-white p-6 rounded-2xl border border-stone-200/60 shadow-sm hover:shadow-md hover:-translate-y-1 hover:scale-[1.02] hover:border-emerald-500/30 transition-all duration-300 flex flex-col items-center justify-center text-center gap-4">
-        <div
-          class="w-20 h-20 flex items-center justify-center bg-stone-50 rounded-xl group-hover:bg-emerald-50 transition-colors">
+        <!-- 7. Démocratie & Institutions -->
+        <a href="audits.html?domaine=democratie"
+          class="group relative flex flex-col items-center sm:items-start gap-2 transition-all duration-300 hover:-translate-y-1">
           <img src="images/icone-democratie.webp" alt="⚖️"
-            class="w-14 h-14 object-contain group-hover:scale-110 transition-transform">
-        </div>
-        <div>
-          <h3 class="font-bold text-stone-950 text-base">Démocratie & Institutions[cite: 3]</h3>
-          <p class="text-xs text-stone-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-1">
-            Consulter l'audit[cite: 3]</p>
-        </div>
-      </a>
+            class="w-20 h-20 object-contain transition-transform duration-300 group-hover:scale-110 select-none pointer-events-none">
+          <span
+            class="sm:absolute sm:left-24 sm:top-7 bg-stone-900 text-white text-sm font-semibold px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+            ⚖️ Démocratie & Institutions[cite: 3]
+          </span>
+        </a>
 
-      <!-- 8. BOUTON : Organisations publiques & privées -->
-      <a href="audits.html?domaine=organisations"
-        class="group bg-white p-6 rounded-2xl border border-stone-200/60 shadow-sm hover:shadow-md hover:-translate-y-1 hover:scale-[1.02] hover:border-emerald-500/30 transition-all duration-300 flex flex-col items-center justify-center text-center gap-4">
-        <div
-          class="w-20 h-20 flex items-center justify-center bg-stone-50 rounded-xl group-hover:bg-emerald-50 transition-colors">
+        <!-- 8. Organisations publiques & privées -->
+        <a href="audits.html?domaine=organisations"
+          class="group relative flex flex-col items-center sm:items-start gap-2 transition-all duration-300 hover:-translate-y-1">
           <img src="images/icone-organisations.webp" alt="🏢"
-            class="w-14 h-14 object-contain group-hover:scale-110 transition-transform">
-        </div>
-        <div>
-          <h3 class="font-bold text-stone-950 text-base">Organisations Publiques & Privées[cite: 3]</h3>
-          <p class="text-xs text-stone-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-1">
-            Consulter l'audit[cite: 3]</p>
-        </div>
-      </a>
+            class="w-20 h-20 object-contain transition-transform duration-300 group-hover:scale-110 select-none pointer-events-none">
+          <span
+            class="sm:absolute sm:left-24 sm:top-7 bg-stone-900 text-white text-sm font-semibold px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+            🏢 Organisations Publiques[cite: 3]
+          </span>
+        </a>
 
-      <!-- 9. BOUTON : Le Vivant & Rejoindre -->
-      <a href="audits.html#rejoindre"
-        class="group bg-white p-6 rounded-2xl border border-stone-200/60 shadow-sm hover:shadow-md hover:-translate-y-1 hover:scale-[1.02] hover:border-emerald-500/30 transition-all duration-300 flex flex-col items-center justify-center text-center gap-4">
-        <div
-          class="w-20 h-20 flex items-center justify-center bg-stone-50 rounded-xl group-hover:bg-emerald-50 transition-colors">
+        <!-- 9. Le Vivant & Nouveau GÉT -->
+        <a href="audits.html#rejoindre"
+          class="group relative flex flex-col items-center sm:items-start gap-2 transition-all duration-300 hover:-translate-y-1">
           <img src="images/icone-vivant.webp" alt="🌱"
-            class="w-14 h-14 object-contain group-hover:scale-110 transition-transform">
-        </div>
-        <div>
-          <h3 class="font-bold text-stone-950 text-base">Préservation du Vivant & GÉT</h3>
-          <p class="text-xs text-stone-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-1">
-            Lancer un nouvel audit[cite: 3]</p>
-        </div>
-      </a>
+            class="w-20 h-20 object-contain transition-transform duration-300 group-hover:scale-110 select-none pointer-events-none">
+          <span
+            class="sm:absolute sm:left-24 sm:top-7 bg-stone-900 text-white text-sm font-semibold px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+            🌱 Préservation du Vivant & GÉT[cite: 1, 2, 3]
+          </span>
+        </a>
+      </div>
 
     </div>
 
     <!-- PETITE ACCROCHE BASSE -->
-    <p class="text-xs text-stone-400 uppercase tracking-widest font-bold">
+    <p class="text-xs text-stone-400 uppercase tracking-widest font-bold mt-4">
       Les audits des citoyens lambda
     </p>
 
