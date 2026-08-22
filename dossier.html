@@ -40,6 +40,18 @@
       <p class="text-stone-600 text-sm mt-3">🧭 <strong>Parcours :</strong> Accueil (un domaine) → ce dossier → ses documents → ses affirmations.</p>
     </div>
 
+    <!-- Proposer une affirmation DANS ce dossier de travail (domaine + dossier implicites) -->
+    <div id="proposer-block" class="bg-white rounded-2xl border border-stone-200/60 p-6 mb-8">
+      <h3 class="font-bold text-stone-900 mb-1">💡 Proposer une affirmation dans ce dossier</h3>
+      <p class="text-xs text-stone-500 mb-3">Le domaine et le dossier sont déjà fixés (vous êtes dans ce dossier de travail).</p>
+      <textarea id="aff-texte" rows="2" placeholder="L'affirmation : « … » (à vérifier, pas un slogan)" class="w-full bg-stone-50 text-sm px-4 py-3 rounded-xl border border-stone-200 placeholder-stone-400"></textarea>
+      <div class="mt-2 flex flex-col sm:flex-row gap-2">
+        <input id="aff-source" type="url" placeholder="Source (URL, optionnel)" class="flex-1 bg-stone-50 text-sm px-4 py-2.5 rounded-xl border border-stone-200 placeholder-stone-400">
+        <button id="btn-affirmer" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold px-6 py-2.5 rounded-xl transition cursor-pointer">Proposer l'affirmation</button>
+      </div>
+      <p id="aff-msg" class="text-sm text-emerald-600 mt-2"></p>
+    </div>
+
     <h2 class="text-lg font-bold text-stone-900 mb-3">Dossiers disponibles</h2>
     <div id="liste-dossiers" class="flex flex-col gap-4 mb-8">Chargement des dossiers…</div>
   </main>
@@ -129,6 +141,31 @@
         box.innerHTML='<p class="text-red-600 text-xs">Erreur détail : '+esc(e.message)+'</p>';
       }
     }
+
+    // ---- Proposer une affirmation dans le dossier courant (domaine+dossier implicites) ----
+    async function post(path, body){
+      const r=await fetch(API+path,{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify(body)});
+      if(!r.ok){ let m='HTTP '+r.status; try{const j=await r.json();m=j.message||m;}catch(e){} throw new Error(m); }
+      try{return await r.json();}catch(e){return null;}
+    }
+    const pp = new URLSearchParams(window.location.search);
+    const dossierCourant = pp.get('d');
+    const propBlock=document.getElementById('proposer-block');
+    if(propBlock){ if(dossierCourant){ propBlock.classList.remove('hidden'); } else { propBlock.classList.add('hidden'); } }
+    document.getElementById('btn-affirmer').addEventListener('click', async ()=>{
+      const texte=document.getElementById('aff-texte').value.trim();
+      const src=document.getElementById('aff-source').value.trim();
+      const msg=document.getElementById('aff-msg');
+      if(!texte){ msg.textContent='Le texte est requis.'; return; }
+      if(!dossierCourant){ msg.textContent='Ouvert depuis un dossier de travail pour proposer une affirmation.'; return; }
+      msg.textContent='Envoi…';
+      try{
+        await post('/rest/v1/affirmations',{texte,dossier_id:dossierCourant,auteur_ajout:'Citoyen lambda'});
+        msg.textContent='✅ Affirmation déposée dans ce dossier.';
+        document.getElementById('aff-texte').value=''; document.getElementById('aff-source').value='';
+        chargerDossiers();
+      }catch(e){ msg.textContent='Erreur : '+e.message; }
+    });
 
     chargerDossiers();
   </script>
