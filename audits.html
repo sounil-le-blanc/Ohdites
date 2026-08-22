@@ -28,10 +28,9 @@
     </div>
     <nav class="flex gap-8 text-sm font-semibold text-stone-600">
       <a href="index.html" class="hover:text-emerald-700 transition pb-1">Accueil</a>
-      <a href="affirmations.html" class="hover:text-emerald-700 transition pb-1">Affirmations</a>
-      <a href="charte.html" class="hover:text-emerald-700 transition pb-1">Charte <a href="affirmations.html" class="hover:text-emerald-700 transition pb-1">Affirmations</a>
-      <a href="charte.html" class="hover:text-emerald-700 transition pb-1">Charte <a href="charte.html" class="hover:text-emerald-700 transition pb-1">Charte & Valeurs</a> Valeurs</a> Valeurs</a>
       <a href="audits.html" class="text-emerald-700 border-b-2 border-emerald-700 pb-1 transition">Les Audits (GÉT)</a>
+      <a href="affirmations.html" class="hover:text-emerald-700 transition pb-1">Affirmations</a>
+      <a href="charte.html" class="hover:text-emerald-700 transition pb-1">Charte & Valeurs</a>
       <a href="fun.html" class="hover:text-emerald-700 transition pb-1">Espace F.U.N.</a>
     </nav>
   </header>
@@ -190,10 +189,42 @@
     conteneur.innerHTML = html;
     conteneur.classList.remove('hidden');
 
-    point.innerHTML = `
-      <div id="rejoindre" class="bg-stone-900 text-stone-100 rounded-3xl p-8 transition-all duration-500 target:ring-4 target:ring-emerald-500">
+    point.innerHTML = !domaine
+      ? // === ÉTAT INDEX GÉNÉRALE : didactique, on guide le choix ===
+        `
+      <div id="rejoindre" class="bg-stone-900 text-stone-100 rounded-3xl p-8 transition-all duration-500">
+        <h3 class="text-xl font-bold mb-2">👋 Par où commencer ?</h3>
+        <p class="text-stone-300 text-sm mb-4">Oh Dites ! est une méthode d'audit citoyen : on <strong>source</strong>,
+        on <strong>croise</strong>, on <strong>restaure</strong>. Le parcours se fait en 4 étapes :
+        <span class="text-emerald-300 font-semibold">Choisir un domaine → voir le dossier → lire les documents → vérifier les affirmations</span>.</p>
+        <ol class="text-left text-sm text-stone-300 space-y-2 mb-4">
+          <li><strong>1.</strong> Clique sur une des bulles du grand commun (⚡Énergie, 🌾Agriculture…).</li>
+          <li><strong>2.</strong> Sur la page du domaine : vois les points d'enquête et propose une source.</li>
+          <li><strong>3.</strong> Retrouve les affirmations vérifiables (onglet <em>Affirmations</em>).</li>
+        </ol>
+        <label class="text-xs font-semibold uppercase tracking-wider text-stone-400">… ou choisis un domaine pour proposer une source :</label>
+        <select id="source-domaine-index" class="mt-2 w-full sm:w-auto bg-stone-800 text-stone-100 text-sm px-4 py-3 rounded-xl border border-stone-700">
+          <option value="">— Choisir un domaine —</option>
+          <option value="energie">⚡ Énergies</option>
+          <option value="transports">🚗 Transports</option>
+          <option value="agriculture">🌾 Agriculture & Résilience</option>
+          <option value="sante">🩺 Santé & Environnement</option>
+          <option value="finance">📊 Économie & Finance</option>
+          <option value="numerique">💻 Médias & Numérique</option>
+          <option value="democratie">⚖️ Démocratie & Institutions</option>
+          <option value="organisations">🏢 Organisations Publiques</option>
+          <option value="vivant">🌱 Préservation du Vivant</option>
+        </select>
+        <div class="mt-3">
+          <button id="btn-aller-domaine" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-6 py-3 rounded-xl transition cursor-pointer">Aller au domaine</button>
+          <span id="index-msg" class="text-sm ml-3 text-emerald-400"></span>
+        </div>
+      </div>`
+      : // === ÉTAT DOMAINE CHOISI : le GÉT + formulaire contextuel ===
+        `
+      <div id="rejoindre" class="bg-stone-900 text-stone-100 rounded-3xl p-8 transition-all duration-500">
         <h3 class="text-xl font-bold mb-1">${entree.titre} — proposer une source.</h3>
-        <p class="text-stone-400 text-sm mb-4">Nous demandons un document, un rapport ou une donnée publique vérifiable. Rien ne disparaît : tout est consigné, en attente de vérification.</p>
+        <p class="text-stone-400 text-sm mb-4">Nous demandons un document, un rapport ou une donnée publique vérifiable, rattaché à <strong>ce</strong> domaine. Rien ne disparaît : tout est consigné, en attente de vérification.</p>
         <form id="form-source" class="flex flex-col gap-3">
           <input id="source-titre" type="text" placeholder="Titre du document" required
             class="bg-stone-800 text-stone-100 text-sm px-4 py-3 rounded-xl border border-stone-700 placeholder-stone-500">
@@ -202,12 +233,24 @@
           <div class="flex gap-3">
             <input id="source-type" type="text" placeholder="Type (rapport, article, donnée...)"
               class="flex-1 bg-stone-800 text-stone-100 text-sm px-4 py-3 rounded-xl border border-stone-700 placeholder-stone-500">
-            <input id="source-domaine" type="hidden" value="${domaine || ''}">
+            <input id="source-domaine" type="hidden" value="${domaine}">
             <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-6 py-3 rounded-xl transition whitespace-nowrap cursor-pointer">Proposer</button>
           </div>
         </form>
         <div id="source-message" class="text-sm mt-3 text-emerald-400"></div>
-      </div>`,
+      </div>`;
+
+    // Gestion du sélecteur en index générale (didactique)
+    const selectIndex = document.getElementById('source-domaine-index');
+    const btnAller = document.getElementById('btn-aller-domaine');
+    const indexMsg = document.getElementById('index-msg');
+    if (selectIndex && btnAller) {
+      btnAller.addEventListener('click', () => {
+        const v = selectIndex.value;
+        if (v) { window.location.href = 'audits.html?domaine=' + v; }
+        else { indexMsg.textContent = "Choisis un domaine d'abord."; }
+      });
+    }
 
     // ---- Intégration Supabase : proposer & lire les sources ----
     (function() {
