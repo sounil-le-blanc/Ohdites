@@ -40,7 +40,15 @@
       <div class="flex flex-col gap-3">
         <textarea id="aff-texte" rows="2" placeholder="L'affirmation : « … » (à vérifier, pas un slogan)"
           class="bg-stone-800 text-stone-100 text-sm px-4 py-3 rounded-xl border border-stone-700 placeholder-stone-500" required></textarea>
-        <input id="aff-source" type="url" placeholder="URL de la source (obligatoire)"
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <select id="aff-domaine" class="bg-stone-800 text-stone-100 text-sm px-4 py-3 rounded-xl border border-stone-700" required>
+            <option value="">— Choisir un domaine (obligatoire) —</option>
+          </select>
+          <select id="aff-dossier" class="bg-stone-800 text-stone-100 text-sm px-4 py-3 rounded-xl border border-stone-700">
+            <option value="">— Dossier (optionnel) —</option>
+          </select>
+        </div>
+        <input id="aff-source" type="url" placeholder="URL de la source"
           class="bg-stone-800 text-stone-100 text-sm px-4 py-3 rounded-xl border border-stone-700 placeholder-stone-500">
         <div>
           <button id="btn-affirm" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-6 py-3 rounded-xl transition cursor-pointer">Proposer l'affirmation</button>
@@ -195,13 +203,17 @@
       const texte = document.getElementById('aff-texte').value.trim();
       const url = document.getElementById('aff-source').value.trim();
       const msg = document.getElementById('aff-msg');
+      const domId = document.getElementById('aff-domaine').value;
+      const dosId = document.getElementById('aff-dossier').value;
       if (!texte) { msg.textContent='Le texte est requis'; return; }
+      if (!domId) { msg.textContent='⚠️ Une affirmation doit être rattachée à un domaine.'; return; }
       msg.textContent = 'Envoi…';
       try {
-        await api('POST', '/rest/v1/affirmations', { texte, auteur_ajout: 'Citoyen lambda' });
+        await api('POST', '/rest/v1/affirmations', { texte, auteur_ajout: 'Citoyen lambda', dossier_id: dosId || null });
         msg.textContent = '✅ Affirmation déposée (statut : proposée)';
         document.getElementById('aff-texte').value='';
         document.getElementById('aff-source').value='';
+        document.getElementById('aff-dossier').value='';
         charger();
       } catch(e){ msg.textContent = 'Erreur : '+e.message; }
     });
@@ -221,6 +233,26 @@
         afficher();
       });
     });
+
+    // ---- Sélecteur domaine/dossier pour la proposition d'affirmation ----
+    async function chargerDomaines(){
+      const sel=document.getElementById('aff-domaine');
+      try{
+        const doms=await api('GET','/rest/v1/domaines?select=id,nom&order=nom');
+        sel.innerHTML='<option value="">— Choisir un domaine (obligatoire) —</option>'+(doms||[]).map(d=>'<option value="'+d.id+'">'+esc(d.nom)+'</option>').join('');
+      }catch(e){}
+    }
+    async function chargerDossiers(domaineId){
+      const sel=document.getElementById('aff-dossier');
+      sel.innerHTML='<option value="">— Dossier (optionnel) —</option>';
+      if(!domaineId) return;
+      try{
+        const dos=await api('GET','/rest/v1/dossiers?select=id,titre&domaine_id=eq.'+encodeURIComponent(domaineId)+'&order=titre');
+        sel.innerHTML+=(dos||[]).map(d=>'<option value="'+d.id+'">'+esc(d.titre)+'</option>').join('');
+      }catch(e){}
+    }
+    document.getElementById('aff-domaine').addEventListener('change',(e)=>chargerDossiers(e.target.value));
+    chargerDomaines();
 
     charger();
   </script>
