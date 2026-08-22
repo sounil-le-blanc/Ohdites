@@ -188,11 +188,30 @@
     }
 
     async function voter(id, type) {
-      const cur = await api('GET', '/rest/v1/affirmations?select=confirmations,contestations&id=eq.'+encodeURIComponent(id));
-      const base = (cur && cur[0]) ? cur[0] : { confirmations:0, contestations:0 };
-      const upd = type==='confirm' ? { confirmations:(base.confirmations||0)+1 } : { contestations:(base.contestations||0)+1 };
-      await api('PATCH', '/rest/v1/affirmations?id=eq.'+encodeURIComponent(id), upd);
-      charger();
+      // EMPÊCHER le double vote (démo : un seul compte actif) via localStorage
+      const cle = 'ohd_vote_' + id + '_' + type;
+      if (localStorage.getItem(cle)) {
+        alert("Vous avez déjà " + (type==='confirm' ? 'confirmé' : 'contesté') + " cette affirmation.");
+        return;
+      }
+      try {
+        const cur = await api('GET', '/rest/v1/affirmations?select=confirmations,contestations,statut&id=eq.'+encodeURIComponent(id));
+        const base = (cur && cur[0]) ? cur[0] : { confirmations:0, contestations:0, statut:'proposee' };
+        // incrément
+        const upd = { };
+        if (type==='confirm') upd.confirmations = (base.confirmations||0) + 1;
+        else upd.contestations = (base.contestations||0) + 1;
+        // logique de statut (démo)
+        const conf = type==='confirm' ? upd.confirmations : (base.confirmations||0);
+        const cont = type==='contest' ? upd.contestations : (base.contestations||0);
+        if (type==='confirm' && conf >= 2) upd.statut = 'confirmee';
+        else if (type==='contest') {
+          upd.statut = (cont > conf) ? 'contestee' : 'nuanacee';
+        }
+        await api('PATCH', '/rest/v1/affirmations?id=eq.'+encodeURIComponent(id), upd);
+        localStorage.setItem(cle, '1');
+        charger();
+      } catch(e){ alert('Erreur : '+e.message); }
     }
 
     document.getElementById('btn-affirm').addEventListener('click', async () => {
