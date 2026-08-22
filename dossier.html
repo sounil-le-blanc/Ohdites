@@ -164,6 +164,7 @@
         msg.textContent='✅ Affirmation déposée dans ce dossier.';
         document.getElementById('aff-texte').value=''; document.getElementById('aff-source').value='';
         chargerDossiers();
+        if(typeof remplirDetail==='function') remplirDetail(dossierCourant);
       }catch(e){ msg.textContent='Erreur : '+e.message; }
     });
 
