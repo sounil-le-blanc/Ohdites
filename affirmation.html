@@ -63,6 +63,18 @@
     </div>
   </main>
 
+  <!-- MODAL DE CONFIRMATION (remplace les popups navigateur) -->
+  <div id="modal-confirm" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl">
+      <h3 id="confirm-titre" class="text-lg font-bold text-red-700 mb-2">⚠️ Confirmer</h3>
+      <p id="confirm-texte" class="text-sm text-stone-600 mb-5"></p>
+      <div class="flex justify-end gap-3">
+        <button id="confirm-non" class="px-5 py-2.5 rounded-xl border border-stone-300 text-sm text-stone-600 hover:bg-stone-100 transition cursor-pointer">Annuler</button>
+        <button id="confirm-oui" class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-bold transition cursor-pointer">Confirmer</button>
+      </div>
+    </div>
+  </div>
+
   <footer class="w-full max-w-7xl mx-auto px-6 py-4 border-t border-stone-200/80 text-center text-xs text-stone-500">
     © 2026 Oh Dites ! — Espace de compréhension, pas de combat.
   </footer>
@@ -81,6 +93,31 @@
       if(!r.ok){ let m='HTTP '+r.status; try{const j=await r.json();m=j.message||m;}catch(e){} throw new Error(m); }
       try{return await r.json();}catch(e){return null;}
     }
+
+    // Confirmation par modal intégré (remplace les popups navigateur)
+
+    let confirmCallback=null;
+
+    function confirmer(titre, texte, callback){
+
+      document.getElementById('confirm-titre').textContent=titre;
+
+      document.getElementById('confirm-texte').textContent=texte;
+
+      confirmCallback=callback;
+
+      const m=document.getElementById('modal-confirm');
+
+      m.classList.remove('hidden'); m.classList.add('flex');
+
+    }
+
+    function fermerConfirm(){ const m=document.getElementById('modal-confirm'); m.classList.add('hidden'); m.classList.remove('flex'); confirmCallback=null; }
+
+    document.getElementById('confirm-non').addEventListener('click', fermerConfirm);
+
+    document.getElementById('confirm-oui').addEventListener('click', ()=>{ const cb=confirmCallback; fermerConfirm(); if(cb) cb(); });
+
 
     // ---------- en-tête ----------
     async function chargerEntete(){
@@ -105,12 +142,11 @@
           </div>`;
         // suppression de l'affirmation (god mode) + tout son contenu en cascade
         const bs=document.getElementById('btn-suppr-aff');
-        if(bs) bs.addEventListener('click', async ()=>{
-          if(!confirm('Supprimer définitivement cette affirmation et tout son contenu (cartes, commentaires, réactions) ?')) return;
-          try{
-            await api('DELETE','/rest/v1/affirmations?id=eq.'+encodeURIComponent(affId));
-            window.location.href='affirmations.html';
-          }catch(e){ alert('Erreur : '+e.message); }
+        if(bs) bs.addEventListener('click', ()=>{
+          confirmer('Supprimer cette affirmation', 'Tout le contenu lié (cartes, commentaires, réactions) sera définitivement supprimé. Cette action est irréversible.', async ()=>{
+            try{ await api('DELETE','/rest/v1/affirmations?id=eq.'+encodeURIComponent(affId)); window.location.href='affirmations.html'; }
+            catch(e){ alert('Erreur : '+e.message); }
+          });
         });
       }catch(e){ head.innerHTML='<p class="text-red-600 text-sm">Erreur : '+esc(e.message)+'</p>'; }
     }
@@ -208,12 +244,13 @@
 
     // ---------- retirer une carte (supprime la carte + ses commentaires enfants) ----------
     async function retirerCarte(carteId){
-      try{
-        if(!confirm('Retirer cette carte et tous ses commentaires ?')) return;
-        await api('DELETE','/rest/v1/echanges?id=eq.'+encodeURIComponent(carteId));
-        await recalculerCompteurs();        // <-- attendre le recalcul (compteurs MAJ en base)
-        chargerFil();
-      }catch(e){ alert('Erreur : '+e.message); }
+      confirmer('Retirer cette carte', 'La carte et tous ses commentaires seront supprimés. Cette action est irréversible.', async ()=>{
+        try{
+          await api('DELETE','/rest/v1/echanges?id=eq.'+encodeURIComponent(carteId));
+          await recalculerCompteurs();
+          chargerFil();
+        }catch(e){ alert('Erreur : '+e.message); }
+      });
     }
     async function retirerCommentaire(commentId){
       try{ await api('DELETE','/rest/v1/echanges?id=eq.'+encodeURIComponent(commentId)); chargerFil(); }
