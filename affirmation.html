@@ -209,7 +209,12 @@
     });
 
     // ---------- vote/undo ----------
-    function calculStatut(conf, cont){ if(cont>0) return 'contestee'; if(conf>=2) return 'confirmee'; return 'proposee'; }
+    function calculStatut(conf, cont){
+      if(cont>0) return 'contestee';
+      if(conf>=2) return 'confirmee';
+      if(conf>=1) return 'a_verifier';  // 1 confirmation = premier accord (encore à vérifier)
+      return 'proposee';
+    }
     async function realiserVote(id, type, motifTexte){
       const cle='ohd_vote_'+id+'_'+type;
       const deja=!!localStorage.getItem(cle);
