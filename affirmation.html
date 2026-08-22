@@ -99,7 +99,19 @@
             ${aff.auteur_ajout?'<span class="text-stone-400">par '+esc(aff.auteur_ajout)+'</span>':''}
             ${aff.confirmations>0?'<span class="text-emerald-700">✓ '+aff.confirmations+'</span>':''}
             ${aff.contestations>0?'<span class="text-red-700">✗ '+aff.contestations+'</span>':''}
+          </div>
+          <div class="mt-3 flex justify-end">
+            <button id="btn-suppr-aff" class="text-xs text-red-600 border border-red-200 px-3 py-1.5 rounded-xl hover:bg-red-50 transition cursor-pointer">🗑 Supprimer cette affirmation</button>
           </div>`;
+        // suppression de l'affirmation (god mode) + tout son contenu en cascade
+        const bs=document.getElementById('btn-suppr-aff');
+        if(bs) bs.addEventListener('click', async ()=>{
+          if(!confirm('Supprimer définitivement cette affirmation et tout son contenu (cartes, commentaires, réactions) ?')) return;
+          try{
+            await api('DELETE','/rest/v1/affirmations?id=eq.'+encodeURIComponent(affId));
+            window.location.href='affirmations.html';
+          }catch(e){ alert('Erreur : '+e.message); }
+        });
       }catch(e){ head.innerHTML='<p class="text-red-600 text-sm">Erreur : '+esc(e.message)+'</p>'; }
     }
 
