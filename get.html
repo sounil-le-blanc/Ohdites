@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GÉT (chaîne) — Oh Dites !</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="icon" type="image/png" href="./favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+  <link rel="shortcut icon" href="./favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
+  <link rel="manifest" href="./site.webmanifest" />
+</head>
+<body class="bg-stone-50 text-stone-800 font-sans min-h-screen flex flex-col">
+  <header class="w-full max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-stone-200/80">
+    <div class="flex items-center gap-3">
+      <img src="images/cerveau-mains-relief.webp" alt="Logo" class="w-8 h-8 object-contain select-none pointer-events-none">
+      <a href="index.html" class="text-2xl font-black tracking-tight text-emerald-700">Oh Dites !</a>
+    </div>
+    <nav class="flex gap-8 text-sm font-semibold text-stone-600">
+      <a href="index.html" class="hover:text-emerald-700 transition pb-1">Accueil</a>
+      <a href="audits.html" class="hover:text-emerald-700 transition pb-1">Les Audits (GÉT)</a>
+      <a href="affirmations.html" class="hover:text-emerald-700 transition pb-1">Affirmations</a>
+      <a href="dossier.html" class="hover:text-emerald-700 transition pb-1">Dossiers</a>
+      <a href="charte.html" class="hover:text-emerald-700 transition pb-1">Charte & Valeurs</a>
+      <a href="fun.html" class="hover:text-emerald-700 transition pb-1">Espace F.U.N.</a>
+    </nav>
+  </header>
+
+  <main class="w-full max-w-4xl mx-auto px-6 py-10 flex-grow">
+    <a href="audits.html" class="text-sm text-emerald-700 hover:underline">&larr; Retour aux domaines</a>
+
+    <!-- En-tête du GÉT (la chaîne) -->
+    <div id="get-head" class="mt-4 bg-white rounded-2xl border border-stone-200/60 p-6 shadow-sm">
+      <p class="text-stone-400 text-sm">Chargement du GÉT…</p>
+    </div>
+
+    <!-- Créer un dossier de travail dans cette chaîne -->
+    <div class="mt-6 bg-white rounded-2xl border border-stone-200/60 p-6">
+      <h3 class="font-bold text-stone-900 mb-3">📁 Créer un dossier de travail</h3>
+      <div class="flex flex-col gap-2">
+        <input id="nvo-dossier-titre" type="text" placeholder="Titre du dossier (ex: Le vrai coût de l'électricité)" class="bg-stone-50 text-sm px-4 py-3 rounded-xl border border-stone-200 placeholder-stone-400" required>
+        <textarea id="nvo-dossier-resume" rows="2" placeholder="Description courte (que veut-on vérifier ?)" class="bg-stone-50 text-sm px-4 py-3 rounded-xl border border-stone-200 placeholder-stone-400"></textarea>
+        <div class="flex justify-end">
+          <button id="btn-creer-dossier" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold px-6 py-2.5 rounded-xl transition cursor-pointer">Créer le dossier</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Les dossiers de travail de la chaîne -->
+    <div class="mt-8">
+      <h3 class="font-bold text-stone-900 mb-3">📂 Dossiers de travail de ce GÉT</h3>
+      <div id="liste-dossiers" class="flex flex-col gap-4"><p class="text-stone-400 text-sm">Chargement…</p></div>
+    </div>
+  </main>
+
+  <footer class="w-full max-w-7xl mx-auto px-6 py-4 border-t border-stone-200/80 text-center text-xs text-stone-500">
+    © 2026 Oh Dites ! — Espace de compréhension, pas de combat.
+  </footer>
+
+  <script>
+    const API = 'https://trchckgeemvqlgbcrntz.supabase.co';
+    const KEY = 'sb_publishable_fAefpcpQfoolCPlQwBzxlg_0M9-jfRV';
+    const params = new URLSearchParams(window.location.search);
+    const get_id = params.get('id');
+
+    function esc(t){ const d=document.createElement('div'); d.textContent=(t==null?'':String(t)); return d.innerHTML; }
+    async function api(method, path, body){
+      const r=await fetch(API+path,{method,cache:'no-store',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Accept':'application/json','Prefer':'return=representation','Cache-Control':'no-cache'},body:body?JSON.stringify(body):undefined});
+      if(!r.ok){ let m='HTTP '+r.status; try{const j=await r.json();m=j.message||m;}catch(e){} throw new Error(m); }
+      try{return await r.json();}catch(e){return null;}
+    }
+
+    async function chargerGet(){
+      const head=document.getElementById('get-head');
+      try{
+        const g=await api('GET','/rest/v1/gets?select=*,domaines(nom)&id=eq.'+encodeURIComponent(get_id));
+        const gt=g&&g[0];
+        if(!gt){ head.innerHTML='<p class="text-red-600">GÉT introuvable.</p>'; return; }
+        head.innerHTML=`
+          <div class="flex items-start justify-between gap-3">
+            <div><h1 class="text-2xl font-black text-stone-900">${gt.nom ? '📺 '+esc(gt.nom) : ''}</h1>
+            <p class="text-stone-500 text-sm mt-1">${gt.domaines && gt.domaines.nom ? 'Domaine : '+esc(gt.domaines.nom) : ''}</p></div>
+          </div>
+          ${gt.description ? '<p class="text-stone-600 text-sm mt-2">'+esc(gt.description)+'</p>' : ''}
+          <div class="mt-3 text-xs text-stone-400 flex flex-wrap gap-4">
+            ${gt.responsable ? '<span>👤 Responsable : '+esc(gt.responsable)+'</span>' : ''}
+            ${gt.secretaire ? '<span>🗒 Secrétaire : '+esc(gt.secretaire)+'</span>' : ''}
+          </div>`;
+      }catch(e){ head.innerHTML='<p class="text-red-600 text-sm">Erreur : '+esc(e.message)+'</p>'; }
+    }
+
+    async function chargerDossiers(){
+      const zone=document.getElementById('liste-dossiers');
+      try{
+        const d=await api('GET','/rest/v1/dossiers?select=id,titre,resume&get_id=eq.'+encodeURIComponent(get_id)+'&order=titre');
+        if(!d||!d.length){ zone.innerHTML='<div class="bg-white rounded-2xl border p-6 text-stone-500 text-sm">Aucun dossier de travail dans cette chaîne pour l\'instant. Créez le premier !</div>'; return; }
+        zone.innerHTML=d.map(x=>`
+          <div class="bg-white rounded-2xl border border-stone-200/60 p-5 shadow-sm">
+            <a href="dossier.html?d=${x.id}" class="text-emerald-700 font-bold hover:underline">📁 ${esc(x.titre)}</a>
+            <p class="text-stone-500 text-xs mt-1">${esc(x.resume||'')}</p>
+          </div>`).join('');
+      }catch(e){ zone.innerHTML='<p class="text-red-600 text-sm">Erreur : '+esc(e.message)+'</p>'; }
+    }
+
+    document.getElementById('btn-creer-dossier').addEventListener('click', async ()=>{
+      const titre=document.getElementById('nvo-dossier-titre').value.trim();
+      const resume=document.getElementById('nvo-dossier-resume').value.trim();
+      if(!titre){ alert('Titre du dossier requis.'); return; }
+      try{
+        await api('POST','/rest/v1/dossiers',{titre,resume:resume||null,get_id});
+        document.getElementById('nvo-dossier-titre').value='';
+        document.getElementById('nvo-dossier-resume').value='';
+        chargerDossiers();
+      }catch(e){ alert('Erreur : '+e.message); }
+    });
+
+    chargerGet();
+    chargerDossiers();
+  </script>
+</body>
+</html>
