@@ -7,11 +7,11 @@
   <title>Les Audits & GÉT — Oh Dites !</title>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <!-- Favicons et Manifest -->
-  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="shortcut icon" href="/favicon.ico" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-  <link rel="manifest" href="/site.webmanifest" />
+  <link rel="icon" type="image/png" href="./favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+  <link rel="shortcut icon" href="./favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
+  <link rel="manifest" href="./site.webmanifest" />
 </head>
 
 <body class="bg-stone-50 text-stone-800 font-sans min-h-screen flex flex-col justify-between">
@@ -44,6 +44,10 @@
         pour nourrir la compréhension collective.</p>
     </div>
 
+    <!-- CONTENU D'AUDIT RÉEL — piloté par le JS selon le domaine -->
+    <div id="contenu-audit" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+    <div id="point-entree" class="hidden"></div>
+
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
       <div class="bg-white p-6 rounded-2xl border border-stone-200/60 shadow-sm flex flex-col gap-2">
@@ -70,19 +74,6 @@
 
     </div>
 
-    <div id="rejoindre"
-      class="bg-stone-900 text-stone-100 rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-6 transition-all duration-500 target:ring-4 target:ring-emerald-500">
-      <div class="max-w-md">
-        <h3 class="text-xl font-bold mb-1">Aucune question n’est interdite.</h3>
-        <p class="text-stone-400 text-sm">Vous souhaitez proposer l'ouverture d'un audit prioritaire ou rejoindre un
-          Groupe d'Étude et de Travail existant ?</p>
-      </div>
-      <button onclick="alert('Simulation MVP : Formulaire bientôt connecté à Supabase !')"
-        class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-6 py-3 rounded-xl transition whitespace-nowrap cursor-pointer">
-        Lancer une Fiche GÉT
-      </button>
-    </div>
-
   </main>
 
   <footer
@@ -98,21 +89,111 @@
     const titreEl = document.getElementById('titre-domaine');
 
     const dictionnaires = {
-      'energie': '⚡ GÉT Énergies',
-      'transports': '🚗 GÉT Transports',
-      'agriculture': '🌾 GÉT Agriculture & Résilience',
-      'sante': '🩺 GÉT Santé & Environnement',
-      'finance': '📊 GÉT Économie & Finance',
-      'numerique': '💻 GÉT Médias & Numérique',
-      'democratie': '⚖️ GÉT Démocratie & Institutions',
-      'organisations': '🏢 GÉT Organisations Publiques & Privées'
+      'energie': {
+        titre: '⚡ GÉT Énergies',
+        faits: [
+          ['Mix électrique', 'En 2023, la production nucléaire a représenté environ 65% de l\'électricité française (source RTE, chiffres officiels).'],
+          ['Prix', 'Les tarifs réglementés de l\'électricité ont connu des hausses notables ces dernières années (CRE).'],
+          ['Point d\'entrée', 'La filière du nucléaire, de l\'éolien et du solaire se documente par affrontements de sources officielles.']
+        ]
+      },
+      'transports': {
+        titre: '🚗 GÉT Transports & Mobilité',
+        faits: [
+          ['Émissions', 'Le secteur des transports est l\'un des premiers contributeurs aux émissions de gaz à effet de serre en France (SDES).'],
+          ['Infrastructures', 'Le réseau de transport du quotidien (trains, bus) fait l\'objet de plans d\'investissement contrastés selon les territoires.'],
+          ['Point d\'entrée', 'Comparer promesses affichées et réalisations réelles sur les lignes et dessertes.']
+        ]
+      },
+      'agriculture': {
+        titre: '🌾 GÉT Agriculture & Résilience',
+        faits: [
+          ['Revenu agricole', 'L\'évolution du revenu des agriculteurs varie fortement selon les filières et les années (Agreste).'],
+          ['Eau', 'Les tensions sur la ressource en eau irriguée sont documentées dans plusieurs bassins (agences de l\'eau).'],
+          ['Point d\'entrée', 'Croiser les données de production, de prix et d\'impact environnemental filière par filière.']
+        ]
+      },
+      'sante': {
+        titre: '🩺 GÉT Santé & Environnement',
+        faits: [
+          ['Accès soins', 'Les déserts médicaux sont documentés par l\'Atlas de la démographie médicale (Ordre des médecins).'],
+          ['Polluants', 'Les expositions environnementales (pesticides, air) font l\'objet de suivis sanitaires officiels (Santé publique France).'],
+          ['Point d\'entrée', 'Établir des constats sur l\'accès aux soins et les facteurs environnementaux, sourcés.']
+        ]
+      },
+      'finance': {
+        titre: '📊 GÉT Économie & Finance',
+        faits: [
+          ['Dépense publique', 'Les comptes publics sont publiés par la direction du budget / Cour des comptes.'],
+          ['Endettement', 'La trajectoire de la dette publique est suivie par des organismes officiels et indépendants.'],
+          ['Point d\'entrée', 'Chiffrer, recouper et documenter sans parti pris les grands postes budgétaires.']
+        ]
+      },
+      'numerique': {
+        titre: '💻 GÉT Médias & Numérique',
+        faits: [
+          ['Propagande en ligne', 'Les manipulations de l\'information (botnets, contenus sponsorisés) font l\'objet d\'études (rapports parlementaires, chercheurs).'],
+          ['Biais d\'algorithme', 'Les grands plateformes documentent leurs politiques de modération et de transparence.'],
+          ['Point d\'entrée', 'Étudier la circulation réelle de l\'information et ses biais, sourcée.']
+        ]
+      },
+      'democratie': {
+        titre: '⚖️ GÉT Démocratie & Institutions',
+        faits: [
+          ['Participation', 'Les taux de participation aux scrutins sont publiés par les institutions officielles.'],
+          ['Loi & impôts', 'Les textes adoptés et les mécanismes de décision sont documentés dans les comptes rendus parlementaires.'],
+          ['Point d\'entrée', 'Documenter comment la décision publique se construit réellement, texte par texte.']
+        ]
+      },
+      'organisations': {
+        titre: '🏢 GÉT Organisations Publiques & Privées',
+        faits: [
+          ['Transparence', 'Les rémunérations et mandats des dirigeants d\'organismes publics sont parfois publiés (Haute Autorité).'],
+          ['Commandes', 'Les marchés publics sont tracés dans des bases de données ouvertes (data.gouv.fr).'],
+          ['Point d\'entrée', 'Recouper l\'existence réelle d\'une organisation avec ses comptes et actes publiés.']
+        ]
+      }
     };
 
-    if (domaine && dictionnaires[domaine]) {
-      titreEl.textContent = dictionnaires[domaine];
-    } else {
-      titreEl.textContent = '🔍 Index Général des Audits Citoyens';
-    }
+    const domDefault = {
+      titre: '🔍 Index Général des Audits Citoyens',
+      faits: [
+        ['Méthode', 'Oh Dites ! croise des sources officielles et des données publiques vérifiables, sans prendre parti.'],
+        ['Comment lire', 'Chaque auditoire examine un sujet sous plusieurs angles, par des compétences variées.'],
+        ['Avancer', 'Choisissez un domaine dans la couronne pour voir les points d\'enquête ouverts.']
+      ]
+    };
+
+    const entree = (domaine && dictionnaires[domaine]) ? dictionnaires[domaine] : domDefault;
+    titreEl.textContent = entree.titre;
+
+    // Génération du contenu (faits = listes de paires [titre, texte])
+    const conteneur = document.getElementById('contenu-audit');
+    conteneur.classList.remove('hidden');
+    conteneur.classList.add('hidden');
+
+    const point = document.getElementById('point-entree');
+    point.classList.remove('hidden');
+
+    let html = '';
+    entree.faits.forEach(fait => {
+      html += `
+      <div class="bg-white p-5 rounded-2xl border border-stone-200/60 shadow-sm">
+        <h3 class="font-bold text-stone-900 text-sm mb-1">${fait[0]}</h3>
+        <p class="text-stone-600 text-xs leading-relaxed">${fait[1]}</p>
+      </div>`;
+    });
+    conteneur.innerHTML = html;
+    conteneur.classList.remove('hidden');
+
+    point.innerHTML = `
+      <div id="rejoindre" class="bg-stone-900 text-stone-100 rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-6 transition-all duration-500 target:ring-4 target:ring-emerald-500">
+        <div class="max-w-md">
+          <h3 class="text-xl font-bold mb-1">${entree.titre} — ouvrir le débat.</h3>
+          <p class="text-stone-400 text-sm">Rejoindre ou proposer le point d\'enquête : la documentation reste à construire, collectivement.</p>
+        </div>
+        <button onclick="alert('Formulaire : à connecter (Supabase). Ceci est un jalon MVP.')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-6 py-3 rounded-xl transition whitespace-nowrap cursor-pointer">Proposer une source</button>
+      </div>`;
   </script>
 
 </body>
