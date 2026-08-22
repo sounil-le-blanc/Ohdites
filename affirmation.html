@@ -72,8 +72,8 @@
     const COUL = { 'proposee':'bg-stone-200 text-stone-700','a_verifier':'bg-yellow-100 text-yellow-800','confirmee':'bg-emerald-100 text-emerald-800','contestee':'bg-orange-100 text-orange-800','nuanacee':'bg-blue-100 text-blue-800','refutee':'bg-red-100 text-red-800','impossible':'bg-stone-100 text-stone-500' };
     function esc(t){ const d=document.createElement('div'); d.textContent=(t==null?'':String(t)); return d.innerHTML; }
     async function api(method, path, body){
-      // anti-cache via header (pas de paramètre d'URL, qui casse PostgREST)
-      const r=await fetch(API+path,{method,headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Accept':'application/json','Prefer':'return=representation','Cache-Control':'no-cache','Pragma':'no-cache'},body:body?JSON.stringify(body):undefined});
+      // anti-cache robuste: cache:'no-store' + headers (désactive le cache navigateur/proxy)
+      const r=await fetch(API+path,{method,cache:'no-store',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Accept':'application/json','Prefer':'return=representation','Cache-Control':'no-cache','Pragma':'no-cache'},body:body?JSON.stringify(body):undefined});
       if(!r.ok){ let m='HTTP '+r.status; try{const j=await r.json();m=j.message||m;}catch(e){} throw new Error(m); }
       try{return await r.json();}catch(e){return null;}
     }
@@ -145,7 +145,7 @@
             else { badge='💬 remarque'; couleur='text-stone-600 bg-stone-100'; }
             const contenant = e.contenu || (e.type==='confirm' ? 'a confirmé cette affirmation' : '');
             const estMoi = (e.auteur||'') === 'Citoyen lambda';
-            return `<div class="rounded-xl border-l-2 border-stone-200 pl-3 py-1">
+            return `<div data-ech-id="${e.id}" class="echange-box rounded-xl border-l-2 border-stone-200 pl-3 py-1">
               <div class="flex items-center gap-2 text-xs"><span class="${couleur} px-2 py-0.5 rounded-full">${badge}</span><span class="text-stone-400">${esc(e.auteur||'Citoyen')}</span>
               ${estMoi?`<button data-id="${e.id}" data-type="${e.type}" class="retirer-btn ml-auto text-[10px] text-stone-400 hover:text-red-600">Retirer</button>`:''}
               </div>
@@ -266,7 +266,11 @@
 
     // Retirer un de mes échanges (vote/remarque) et corriger le compteur
     async function retirerEchange(echId, type){
+      // 1) Retrait visuel IMMÉDIAT (feedback garanti même si API lent)
+      const box=document.querySelector('[data-ech-id="'+echId+'"]');
+      if(box) box.remove();
       try{
+        // 2) Appel API
         await api('DELETE','/rest/v1/echanges?id=eq.'+encodeURIComponent(echId));
         const fil=await api('GET','/rest/v1/echanges?affirmation_id=eq.'+encodeURIComponent(affId));
         const confirms=(fil||[]).filter(e=>e.type==='confirm').length;
@@ -274,6 +278,7 @@
         const upd={confirmations:confirms,contestations:contests,statut:calculStatut(confirms,contests)};
         await api('PATCH','/rest/v1/affirmations?id=eq.'+encodeURIComponent(affId),upd);
         localStorage.removeItem('ohd_vote_'+affId+'_'+type);
+        // 3) rafraîchir (en-tête + fil, cohérent avec la base)
         charger();
       }catch(e){ alert('Erreur retrait : '+e.message); }
     }
