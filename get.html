@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GÉT (chaîne) — Oh Dites !</title>
+  <title>GÉT — Oh Dites !</title>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link rel="icon" type="image/png" href="./favicon-96x96.png" sizes="96x96" />
   <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
@@ -30,12 +30,12 @@
   <main class="w-full max-w-4xl mx-auto px-6 py-10 flex-grow">
     <a href="audits.html" class="text-sm text-emerald-700 hover:underline">&larr; Retour aux domaines</a>
 
-    <!-- En-tête du GÉT (la chaîne) -->
+    <!-- En-tête du GÉT -->
     <div id="get-head" class="mt-4 bg-white rounded-2xl border border-stone-200/60 p-6 shadow-sm">
       <p class="text-stone-400 text-sm">Chargement du GÉT…</p>
     </div>
 
-    <!-- Créer un dossier de travail dans cette chaîne -->
+    <!-- Créer un dossier de travail dans ce GÉT -->
     <div class="mt-6 bg-white rounded-2xl border border-stone-200/60 p-6">
       <h3 class="font-bold text-stone-900 mb-3">📁 Créer un dossier de travail</h3>
       <div class="flex flex-col gap-2">
@@ -47,12 +47,24 @@
       </div>
     </div>
 
-    <!-- Les dossiers de travail de la chaîne -->
+    <!-- Les dossiers de travail du GÉT -->
     <div class="mt-8">
       <h3 class="font-bold text-stone-900 mb-3">📂 Dossiers de travail de ce GÉT</h3>
       <div id="liste-dossiers" class="flex flex-col gap-4"><p class="text-stone-400 text-sm">Chargement…</p></div>
     </div>
   </main>
+
+  <!-- MODAL DE CONFIRMATION -->
+  <div id="modal-confirm" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl">
+      <h3 id="confirm-titre" class="text-lg font-bold text-red-700 mb-2">⚠️ Confirmer</h3>
+      <p id="confirm-texte" class="text-sm text-stone-600 mb-5"></p>
+      <div class="flex justify-end gap-3">
+        <button id="confirm-non" class="px-5 py-2.5 rounded-xl border border-stone-300 text-sm text-stone-600 hover:bg-stone-100 transition cursor-pointer">Annuler</button>
+        <button id="confirm-oui" class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-bold transition cursor-pointer">Confirmer</button>
+      </div>
+    </div>
+  </div>
 
   <footer class="w-full max-w-7xl mx-auto px-6 py-4 border-t border-stone-200/80 text-center text-xs text-stone-500">
     © 2026 Oh Dites ! — Espace de compréhension, pas de combat.
@@ -71,6 +83,31 @@
       try{return await r.json();}catch(e){return null;}
     }
 
+    // Confirmation par modal intégré
+
+    let confirmCallback=null;
+
+    function confirmer(titre, texte, callback){
+
+      document.getElementById('confirm-titre').textContent=titre;
+
+      document.getElementById('confirm-texte').textContent=texte;
+
+      confirmCallback=callback;
+
+      const m=document.getElementById('modal-confirm');
+
+      m.classList.remove('hidden'); m.classList.add('flex');
+
+    }
+
+    function fermerConfirm(){ const m=document.getElementById('modal-confirm'); m.classList.add('hidden'); m.classList.remove('flex'); confirmCallback=null; }
+
+    document.getElementById('confirm-non').addEventListener('click', fermerConfirm);
+
+    document.getElementById('confirm-oui').addEventListener('click', ()=>{ const cb=confirmCallback; fermerConfirm(); if(cb) cb(); });
+
+
     async function chargerGet(){
       const head=document.getElementById('get-head');
       try{
@@ -86,7 +123,18 @@
           <div class="mt-3 text-xs text-stone-400 flex flex-wrap gap-4">
             ${gt.responsable ? '<span>👤 Responsable : '+esc(gt.responsable)+'</span>' : ''}
             ${gt.secretaire ? '<span>🗒 Secrétaire : '+esc(gt.secretaire)+'</span>' : ''}
+          </div>
+          <div class="mt-4 flex justify-end">
+            <button id="btn-suppr-get" class="text-xs text-red-600 border border-red-200 px-3 py-1.5 rounded-xl hover:bg-red-50 transition cursor-pointer">🗑 Supprimer ce GÉT</button>
           </div>`;
+        // suppression du GÉT (god mode) — cascade sur ses dossiers
+        const bs=document.getElementById('btn-suppr-get');
+        if(bs) bs.addEventListener('click', ()=>{
+          confirmer('Supprimer ce GÉT', 'Le GÉT et tous ses dossiers de travail (avec leur contenu) seront définitivement supprimés. Cette action est irréversible.', async ()=>{
+            try{ await api('DELETE','/rest/v1/gets?id=eq.'+encodeURIComponent(get_id)); window.location.href='audits.html'; }
+            catch(e){ alert('Erreur : '+e.message); }
+          });
+        });
       }catch(e){ head.innerHTML='<p class="text-red-600 text-sm">Erreur : '+esc(e.message)+'</p>'; }
     }
 
@@ -94,7 +142,7 @@
       const zone=document.getElementById('liste-dossiers');
       try{
         const d=await api('GET','/rest/v1/dossiers?select=id,titre,resume&get_id=eq.'+encodeURIComponent(get_id)+'&order=titre');
-        if(!d||!d.length){ zone.innerHTML='<div class="bg-white rounded-2xl border p-6 text-stone-500 text-sm">Aucun dossier de travail dans cette chaîne pour l\'instant. Créez le premier !</div>'; return; }
+        if(!d||!d.length){ zone.innerHTML='<div class="bg-white rounded-2xl border p-6 text-stone-500 text-sm">Aucun dossier de travail dans cette GÉT pour l\'instant. Créez le premier !</div>'; return; }
         zone.innerHTML=d.map(x=>`
           <div class="bg-white rounded-2xl border border-stone-200/60 p-5 shadow-sm">
             <a href="dossier.html?d=${x.id}" class="text-emerald-700 font-bold hover:underline">📁 ${esc(x.titre)}</a>
