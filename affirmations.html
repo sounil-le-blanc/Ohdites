@@ -60,6 +60,21 @@
       <span class="px-3 py-1 rounded-full bg-stone-100 text-stone-500">impossible à vérifier</span>
     </div>
 
+    <!-- Recherche, tri, filtre thème -->
+    <div class="bg-white rounded-2xl border border-stone-200/60 p-4 mb-6 flex flex-col sm:flex-row gap-3">
+      <input id="search-aff" type="text" placeholder="🔍 Rechercher une affirmation…"
+        class="flex-1 bg-stone-50 text-sm px-4 py-2.5 rounded-xl border border-stone-200 placeholder-stone-400">
+      <select id="theme-aff" class="sm:w-52 bg-stone-50 text-sm px-4 py-2.5 rounded-xl border border-stone-200">
+        <option value="">Tous les thèmes</option>
+      </select>
+      <select id="tri-aff" class="sm:w-48 bg-stone-50 text-sm px-4 py-2.5 rounded-xl border border-stone-200">
+        <option value="recent">Tri : plus récentes</option>
+        <option value="confirmees">Tri : plus confirmées</option>
+        <option value="conteste">Tri : plus contestées</option>
+        <option value="statut">Tri : par statut</option>
+      </select>
+    </div>
+
     <!-- Liste des affirmations -->
     <div id="liste-affirm" class="flex flex-col gap-4">Chargement…</div>
   </main>
@@ -95,27 +110,51 @@
       try { return await r.json(); } catch(e){ return null; }
     }
 
+    let ToutesAff = [];
+    let Sujets = [];
     async function charger() {
       const zone = document.getElementById('liste-affirm');
       try {
-        const data = await api('GET', '/rest/v1/affirmations?select=*&order=cree_le.desc&limit=200');
-        if (!data || !data.length) { zone.innerHTML = '<div class="bg-white p-6 rounded-2xl border text-stone-500 text-sm">Aucune affirmation déposée. Proposez la première, sourcée.</div>'; return; }
-        // ———— Regroupement par statut (fidèle p.9, rangement lisible) ————
-        const groupes = {};
-        data.forEach(a => { const s=a.statut || 'proposee'; (groupes[s] = groupes[s] || []).push(a); });
-        const ordre = ['a_verifier','proposee','confirmee','contestee','nuanacee','refutee','impossible'];
-        // bandeau de synthèse
-        const synth = data.reduce((acc,a)=>{ const s=a.statut||'proposee'; acc[s]=(acc[s]||0)+1; return acc; }, {});
-        let html = `
+        const data = await api('GET', '/rest/v1/affirmations?select=*,sujets(nom)&order=cree_le.desc&limit=500');
+        ToutesAff = data || [];
+        // charger la liste des thèmes
+        const suj = await api('GET', '/rest/v1/sujets?select=id,nom&order=nom');
+        Sujets = suj || [];
+        const sel = document.getElementById('theme-aff');
+        sel.innerHTML = '<option value="">Tous les thèmes</option>' + Sujets.map(s=>'<option value="'+esc(s.id)+'">'+esc(s.nom)+'</option>').join('');
+        afficher();
+      } catch(e){ zone.innerHTML = '<div class="bg-white p-6 rounded-2xl border text-red-700 text-sm">Erreur de chargement : '+esc(e.message)+'</div>'; }
+    }
+
+    function afficher() {
+      const zone = document.getElementById('liste-affirm');
+      // recherche + filtre thème + tri
+      let liste = ToutesAff.slice();
+      const q = (document.getElementById('search-aff').value || '').toLowerCase().trim();
+      if(q) liste = liste.filter(a => (a.texte||'').toLowerCase().includes(q));
+      const th = document.getElementById('theme-aff').value;
+      if(th) liste = liste.filter(a => a.sujet_id === th);
+      const tri = document.getElementById('tri-aff').value;
+      if(tri==='confirmees') liste.sort((a,b)=>(b.confirmations||0)-(a.confirmations||0));
+      else if(tri==='conteste') liste.sort((a,b)=>(b.contestations||0)-(a.contestations||0));
+      else if(tri==='statut') liste.sort((a,b)=>(a.statut||'').localeCompare(b.statut||''));
+      else liste.sort((a,b)=>(a.cree_le||'').toString() < (b.cree_le||'').toString() ? 1 : -1);
+      if(!liste.length){ zone.innerHTML = '<div class="bg-white p-6 rounded-2xl border text-stone-500 text-sm">Aucune affirmation ne correspond à votre recherche / filtre.</div>'; return; }
+      // regroupement par statut
+      const groupes = {};
+      liste.forEach(a => { const s=a.statut || 'proposee'; (groupes[s] = groupes[s] || []).push(a); });
+      const ordre = ['a_verifier','proposee','confirmee','contestee','nuanacee','refutee','impossible'];
+      const synth = liste.reduce((acc,a)=>{ const s=a.statut||'proposee'; acc[s]=(acc[s]||0)+1; return acc; }, {});
+      let html = `
         <div class="bg-white rounded-2xl border border-stone-200/60 p-4 text-sm flex flex-wrap gap-x-6 gap-y-1">
           <span class="font-bold text-stone-700">Synthèse :</span>
           ${ordre.map(s=> synth[s] ? `<span><span class="inline-block w-2 h-2 rounded-full ${color(s)}"></span> ${label(s)} : <b>${synth[s]}</b></span>` : '').filter(Boolean).join('')}
+          ${liste.length ? `<span class="text-stone-400">— ${liste.length} résultat(s)</span>` : ''}
         </div>`;
-        // sections par statut
-        html += ordre.map(st => {
-          const list = groupes[st];
-          if(!list || !list.length) return '';
-          return `
+      html += ordre.map(st => {
+        const list = groupes[st];
+        if(!list || !list.length) return '';
+        return `
           <div class="mt-5">
             <div class="flex items-center gap-2 mb-2">
               <span class="text-xs font-bold uppercase tracking-wider text-stone-500">${label(st)}</span>
@@ -128,6 +167,7 @@
                   <p class="text-stone-800 font-medium">${esc(a.texte)}</p>
                 </div>
                 <div class="mt-2 text-xs text-stone-500 flex flex-wrap gap-3">
+                  ${a.sujets && a.sujets.nom ? '<span class="text-stone-400">🏷 '+esc(a.sujets.nom)+'</span>' : ''}
                   ${a.auteur_ajout ? '<span>par '+esc(a.auteur_ajout)+'</span>' : ''}
                   ${a.confirmations>0 ? '<span class="text-emerald-700">✓ '+a.confirmations+' confirm.</span>' : ''}
                   ${a.contestations>0 ? '<span class="text-red-700">✗ '+a.contestations+' contre.</span>' : ''}
@@ -139,11 +179,8 @@
               </div>`).join('')}
             </div>
           </div>`;
-        }).filter(Boolean).join('');
-        zone.innerHTML = html;
-      } catch(e){
-        zone.innerHTML = '<div class="bg-white p-6 rounded-2xl border text-red-700 text-sm">Erreur de chargement : '+esc(e.message)+'</div>';
-      }
+      }).filter(Boolean).join('');
+      zone.innerHTML = html;
     }
 
     async function voter(id, type) {
@@ -168,5 +205,10 @@
         charger();
       } catch(e){ msg.textContent = 'Erreur : '+e.message; }
     });
+    // recherche / thème / tri -> re-rendu
+    document.getElementById('search-aff').addEventListener('input', afficher);
+    document.getElementById('theme-aff').addEventListener('change', afficher);
+    document.getElementById('tri-aff').addEventListener('change', afficher);
+
     charger();
   </script>
