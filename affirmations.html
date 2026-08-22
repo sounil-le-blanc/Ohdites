@@ -176,6 +176,7 @@
                   ${a.confirmations>0 ? '<span class="text-emerald-700">✓ '+a.confirmations+' confirm.</span>' : ''}
                   ${a.contestations>0 ? '<span class="text-red-700">✗ '+a.contestations+' contre.</span>' : ''}
                 </div>
+                ${a.commentaire ? '<div class="mt-2 border-l-2 border-red-300 pl-3 text-xs text-stone-600"><span class="font-semibold text-red-700">Contestation : </span>'+esc(a.commentaire)+'</div>' : ''}
                 <div class="mt-2 flex gap-3">
                   ${localStorage.getItem('ohd_vote_'+a.id+'_confirm') ?
                     '<button class="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full hover:underline" onclick="voter(\''+a.id+'\',\'confirm\')">✓ Annuler ma confirmation</button>' :
@@ -202,16 +203,27 @@
     async function voter(id, type) {
       const cle = 'ohd_vote_' + id + '_' + type;
       try {
-        const cur = await api('GET', '/rest/v1/affirmations?select=confirmations,contestations,statut&id=eq.'+encodeURIComponent(id));
-        const base = (cur && cur[0]) ? cur[0] : { confirmations:0, contestations:0, statut:'a_verifier' };
+        const cur = await api('GET', '/rest/v1/affirmations?select=confirmations,contestations,statut,commentaire&id=eq.'+encodeURIComponent(id));
+        const base = (cur && cur[0]) ? cur[0] : { confirmations:0, contestations:0, statut:'a_verifier', commentaire:null };
         const dejaVote = !!localStorage.getItem(cle);
-        // vote ou undo (défaut : annuler si déjà voté)
+
+        // Si on CONTESTE (nouveau vote) : demander un motif argumenté (obligatoire)
+        if (type==='contest' && !dejaVote) {
+          const motif = prompt("Pourquoi contester cette affirmation ? (source, erreur, chiffre contesté…)");
+          if (motif === null || motif.trim() === '') {
+            alert("Vous n\'avez pas donné de motif : la contestation n\'est pas enregistrée.");
+            return;
+          }
+        }
+
         let conf = base.confirmations||0, cont = base.contestations||0;
+        let commentaire = base.commentaire;
         if (type==='confirm') conf = dejaVote ? Math.max(0, conf-1) : conf+1;
         else cont = dejaVote ? Math.max(0, cont-1) : cont+1;
         const upd = { confirmations: conf, contestations: cont, statut: calculStatut(conf, cont) };
+        // on enregistre le motif UNIQUEMENT lors d'une nouvelle contestation argumentée
+        if (type==='contest' && !dejaVote && motif) upd.commentaire = motif.trim();
         await api('PATCH', '/rest/v1/affirmations?id=eq.'+encodeURIComponent(id), upd);
-        // bascule localStorage
         if (dejaVote) localStorage.removeItem(cle); else localStorage.setItem(cle, '1');
         charger();
       } catch(e){ alert('Erreur : '+e.message); }
