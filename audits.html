@@ -358,7 +358,9 @@
         const zone = document.getElementById('liste-sources');
         if (!zone) return;
         try {
-          const data = await sapi('GET', '/rest/v1/sources?select=*&order=cree_le.desc&limit=10');
+          // Filtrer les sources par le domaine courant (si un domaine est choisi)
+          const filtre = domaine ? '&domaine=eq.'+encodeURIComponent(domaine) : '';
+          const data = await sapi('GET', '/rest/v1/sources?select=*&order=cree_le.desc&limit=10'+filtre);
           if (!data || data.length === 0) {
             zone.innerHTML = '<p class="text-stone-500 text-xs">Aucune source déposée. Soyez le premier à en proposer une.</p>';
             return;
