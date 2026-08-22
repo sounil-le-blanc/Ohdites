@@ -79,6 +79,7 @@
 
     // ---------- état global de l'action sélectionnée ----------
     let actionCourante = 'confirm';
+    let modifActive = false;
 
     // ---------- en-tête de l'affirmation ----------
     async function charger(){
@@ -87,6 +88,7 @@
         const a = await api('GET','/rest/v1/affirmations?select=*,sujets(nom)&id=eq.'+encodeURIComponent(affId));
         const aff = a && a[0];
         if(!aff){ document.getElementById('aff-head').innerHTML='<p class="text-red-600 text-sm">Affirmation introuvable.</p>'; return; }
+        const Moi = localStorage.getItem('ohd_moi') || 'Citoyen lambda';
         document.getElementById('aff-head').innerHTML=`
           <div class="flex items-start justify-between gap-3">
             <p class="text-lg font-medium text-stone-900">${esc(aff.texte)}</p>
@@ -97,7 +99,18 @@
             ${aff.auteur_ajout?'<span>par '+esc(aff.auteur_ajout)+'</span>':''}
             ${aff.confirmations>0?'<span class="text-emerald-700">✓ '+aff.confirmations+' confirmations</span>':''}
             ${aff.contestations>0?'<span class="text-red-700">✗ '+aff.contestations+' contestations</span>':''}
-          </div>`;
+          </div>
+          ${aff.auteur_ajout === Moi ? `
+            <div class="mt-3 flex gap-2">
+              <span class="text-xs font-semibold text-stone-500 self-center">C'est votre affirmation :</span>
+              <button id="btn-modif" class="text-xs text-stone-600 border border-stone-300 px-3 py-1.5 rounded-xl hover:bg-stone-100 transition cursor-pointer">✏️ Modifier</button>
+              <button id="btn-suppr" class="text-xs text-red-700 border border-red-200 px-3 py-1.5 rounded-xl hover:bg-red-50 transition cursor-pointer">🗑 Supprimer</button>
+            </div>` : ''}`;
+        // gestion si je suis l'auteur
+        const btnS=document.getElementById('btn-suppr');
+        if(btnS) btnS.addEventListener('click', async ()=>{ if(confirm('Supprimer cette affirmation ?')){ await api('DELETE','/rest/v1/affirmations?id=eq.'+encodeURIComponent(affId)); window.location.href='affirmations.html'; } });
+        const btnM=document.getElementById('btn-modif');
+        if(btnM){ btnM.addEventListener('click', ()=>{ modifActive=true; document.getElementById('post-texte').value=aff.texte; document.getElementById('post-texte').focus(); document.getElementById('post-msg2') && (document.getElementById('post-msg2').textContent='Modif de votre affirmation en cours — cliquez Poster.'); }); }
         chargerFil();
       }catch(e){ document.getElementById('aff-head').innerHTML='<p class="text-red-600 text-sm">Erreur : '+esc(e.message)+'</p>'; }
     }
@@ -178,8 +191,17 @@
     document.getElementById('btn-poster').addEventListener('click', async ()=>{
       const ta=document.getElementById('post-texte');
       const texte=ta.value.trim();
-      const msg=actionCourante;
       try{
+        // MODE MODIFICATION : mettre à jour ma propre affirmation
+        if(modifActive){
+          if(!texte){ alert('Veuillez écrire le nouveau texte.'); return; }
+          await api('PATCH','/rest/v1/affirmations?id=eq.'+encodeURIComponent(affId),{texte});
+          modifActive=false;
+          ta.value='';
+          charger();
+          return;
+        }
+        const msg=actionCourante;
         if(actionCourante==='confirm'){
           await realiserVote(affId,'confirm',null);
           ta.value='';
