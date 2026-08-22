@@ -143,8 +143,11 @@
             else if(e.type==='contest'){ badge='✗ contestation'; couleur='text-red-700 bg-red-50'; }
             else { badge='💬 remarque'; couleur='text-stone-600 bg-stone-100'; }
             const contenant = e.contenu || (e.type==='confirm' ? 'a confirmé cette affirmation' : '');
+            const estMoi = (e.auteur||'') === 'Citoyen lambda';
             return `<div class="rounded-xl border-l-2 border-stone-200 pl-3 py-1">
-              <div class="flex items-center gap-2 text-xs"><span class="${couleur} px-2 py-0.5 rounded-full">${badge}</span><span class="text-stone-400">${esc(e.auteur||'Citoyen')}</span></div>
+              <div class="flex items-center gap-2 text-xs"><span class="${couleur} px-2 py-0.5 rounded-full">${badge}</span><span class="text-stone-400">${esc(e.auteur||'Citoyen')}</span>
+              ${estMoi?`<button class="ml-auto text-[10px] text-stone-400 hover:text-red-600" onclick="retirerEchange('${e.id}','${e.type}')">Retirer</button>`:''}
+              </div>
               ${contenant ? `<p class="text-sm text-stone-700 mt-1">${esc(contenant)}</p>` : ''}
             </div>`;
           }).join('');
@@ -240,16 +243,37 @@
     async function realiserVote(id, type, motifTexte){
       const cle='ohd_vote_'+id+'_'+type;
       const deja=!!localStorage.getItem(cle);
+      if(deja){
+        // déjà voté : on N'ANNULE PAS silencieusement, on signale pour un retrait explicite
+        alert("Vous avez déjà "+(type==='confirm'?'confirmé':'contesté')+" cette affirmation. Retirez-la depuis le fil des échanges (bouton 'Retirer').");
+        return;
+      }
       const cur=await api('GET','/rest/v1/affirmations?select=confirmations,contestations,statut&id=eq.'+encodeURIComponent(id));
       const base=(cur&&cur[0])||{confirmations:0,contestations:0,statut:'proposee'};
       let conf=base.confirmations||0, cont=base.contestations||0;
-      if(type==='confirm') conf = deja ? Math.max(0,conf-1) : conf+1;
-      else cont = deja ? Math.max(0,cont-1) : cont+1;
+      if(type==='confirm') conf += 1; else cont += 1;
       const upd={confirmations:conf,contestations:cont,statut:calculStatut(conf,cont)};
-      if(type==='contest' && !deja && motifTexte) upd.commentaire=motifTexte;
+      if(type==='contest' && motifTexte) upd.commentaire=motifTexte;
       await api('PATCH','/rest/v1/affirmations?id=eq.'+encodeURIComponent(id), upd);
-      if(!deja) await api('POST','/rest/v1/echanges',{affirmation_id:id,type:type,auteur:'Citoyen lambda',contenu: type==='contest' ? motifTexte : null});
-      if(deja) localStorage.removeItem(cle); else localStorage.setItem(cle,'1');
+      await api('POST','/rest/v1/echanges',{affirmation_id:id,type:type,auteur:'Citoyen lambda',contenu: type==='contest' ? motifTexte : null});
+      localStorage.setItem(cle,'1');
+    }
+
+    // Retirer un de mes échanges (vote/remarque) et corriger le compteur
+    async function retirerEchange(echId, type){
+      try{
+        await api('DELETE','/rest/v1/echanges?id=eq.'+encodeURIComponent(echId));
+        // recalculer le compteur depuis le fil restant
+        const fil=await api('GET','/rest/v1/echanges?affirmation_id=eq.'+encodeURIComponent(affId));
+        const confirms=(fil||[]).filter(e=>e.type==='confirm').length;
+        const contests=(fil||[]).filter(e=>e.type==='contest').length;
+        const upd={confirmations:confirms,contestations:contests,statut:calculStatut(confirms,contests)};
+        await api('PATCH','/rest/v1/affirmations?id=eq.'+encodeURIComponent(affId),upd);
+        // nettoyer localStorage du vote retiré
+        localStorage.removeItem('ohd_vote_'+affId+'_'+type);
+        charger();
+        chargerFil();
+      }catch(e){ alert('Erreur : '+e.message); }
     }
 
     charger();
