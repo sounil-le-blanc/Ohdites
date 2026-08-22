@@ -73,6 +73,16 @@
         <option value="conteste">Tri : plus contestées</option>
         <option value="statut">Tri : par statut</option>
       </select>
+      <select id="statut-aff" class="sm:w-52 bg-stone-50 text-sm px-4 py-2.5 rounded-xl border border-stone-200">
+        <option value="">Tous les statuts</option>
+        <option value="a_verifier">à vérifier</option>
+        <option value="proposee">proposée</option>
+        <option value="confirmee">confirmée</option>
+        <option value="contestee">contestée</option>
+        <option value="nuanacee">nuancée</option>
+        <option value="refutee">réfutée</option>
+        <option value="impossible">impossible à vérifier</option>
+      </select>
     </div>
 
     <!-- Liste des affirmations -->
@@ -134,10 +144,12 @@
       if(q) liste = liste.filter(a => (a.texte||'').toLowerCase().includes(q));
       const th = document.getElementById('theme-aff').value;
       if(th) liste = liste.filter(a => a.sujet_id === th);
+      const st = document.getElementById('statut-aff').value;
+      if(st) liste = liste.filter(a => a.statut === st);
       const tri = document.getElementById('tri-aff').value;
       if(tri==='confirmees') liste.sort((a,b)=>(b.confirmations||0)-(a.confirmations||0));
       else if(tri==='conteste') liste.sort((a,b)=>(b.contestations||0)-(a.contestations||0));
-      else if(tri==='statut') liste.sort((a,b)=>(a.statut||'').localeCompare(b.statut||''));
+      else if(tri==='statut'){ const o={'a_verifier':0,'proposee':1,'confirmee':2,'contestee':3,'nuanacee':4,'refutee':5,'impossible':6}; liste.sort((a,b)=>((o[a.statut]===undefined?7:o[a.statut])-(o[b.statut]===undefined?7:o[b.statut]))); }
       else liste.sort((a,b)=>(a.cree_le||'').toString() < (b.cree_le||'').toString() ? 1 : -1);
       if(!liste.length){ zone.innerHTML = '<div class="bg-white p-6 rounded-2xl border text-stone-500 text-sm">Aucune affirmation ne correspond à votre recherche / filtre.</div>'; return; }
       // regroupement par statut
@@ -209,6 +221,7 @@
     document.getElementById('search-aff').addEventListener('input', afficher);
     document.getElementById('theme-aff').addEventListener('change', afficher);
     document.getElementById('tri-aff').addEventListener('change', afficher);
+    document.getElementById('statut-aff').addEventListener('change', afficher);
 
     charger();
   </script>
