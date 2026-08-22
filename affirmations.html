@@ -98,24 +98,49 @@
     async function charger() {
       const zone = document.getElementById('liste-affirm');
       try {
-        const data = await api('GET', '/rest/v1/affirmations?select=*&order=cree_le.desc&limit=50');
+        const data = await api('GET', '/rest/v1/affirmations?select=*&order=cree_le.desc&limit=200');
         if (!data || !data.length) { zone.innerHTML = '<div class="bg-white p-6 rounded-2xl border text-stone-500 text-sm">Aucune affirmation déposée. Proposez la première, sourcée.</div>'; return; }
-        zone.innerHTML = data.map(a => `
-          <div class="bg-white p-5 rounded-2xl border border-stone-200/60 shadow-sm">
-            <div class="flex items-start justify-between gap-3">
-              <p class="text-stone-800 font-medium">${esc(a.texte)}</p>
-              <span class="shrink-0 text-xs px-3 py-1 rounded-full ${color(a.statut)}">${label(a.statut)}</span>
+        // ———— Regroupement par statut (fidèle p.9, rangement lisible) ————
+        const groupes = {};
+        data.forEach(a => { const s=a.statut || 'proposee'; (groupes[s] = groupes[s] || []).push(a); });
+        const ordre = ['a_verifier','proposee','confirmee','contestee','nuanacee','refutee','impossible'];
+        // bandeau de synthèse
+        const synth = data.reduce((acc,a)=>{ const s=a.statut||'proposee'; acc[s]=(acc[s]||0)+1; return acc; }, {});
+        let html = `
+        <div class="bg-white rounded-2xl border border-stone-200/60 p-4 text-sm flex flex-wrap gap-x-6 gap-y-1">
+          <span class="font-bold text-stone-700">Synthèse :</span>
+          ${ordre.map(s=> synth[s] ? `<span><span class="inline-block w-2 h-2 rounded-full ${color(s)}"></span> ${label(s)} : <b>${synth[s]}</b></span>` : '').filter(Boolean).join('')}
+        </div>`;
+        // sections par statut
+        html += ordre.map(st => {
+          const list = groupes[st];
+          if(!list || !list.length) return '';
+          return `
+          <div class="mt-5">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-stone-500">${label(st)}</span>
+              <span class="text-xs px-2 py-0.5 rounded-full ${color(st)}">${list.length}</span>
             </div>
-            <div class="mt-2 text-xs text-stone-500 flex flex-wrap gap-3">
-              ${a.auteur_ajout ? '<span>par '+esc(a.auteur_ajout)+'</span>' : ''}
-              ${a.confirmations>0 ? '<span class="text-emerald-700">✓ '+a.confirmations+' confirm.</span>' : ''}
-              ${a.contestations>0 ? '<span class="text-red-700">✗ '+a.contestations+' contre.</span>' : ''}
+            <div class="flex flex-col gap-3">
+            ${list.map(a => `
+              <div class="bg-white p-5 rounded-2xl border border-stone-200/60 shadow-sm">
+                <div class="flex items-start justify-between gap-3">
+                  <p class="text-stone-800 font-medium">${esc(a.texte)}</p>
+                </div>
+                <div class="mt-2 text-xs text-stone-500 flex flex-wrap gap-3">
+                  ${a.auteur_ajout ? '<span>par '+esc(a.auteur_ajout)+'</span>' : ''}
+                  ${a.confirmations>0 ? '<span class="text-emerald-700">✓ '+a.confirmations+' confirm.</span>' : ''}
+                  ${a.contestations>0 ? '<span class="text-red-700">✗ '+a.contestations+' contre.</span>' : ''}
+                </div>
+                <div class="mt-2 flex gap-3">
+                  <button class="text-xs text-emerald-700 hover:underline" onclick="voter('${a.id}','confirm')">Confirmer</button>
+                  <button class="text-xs text-red-700 hover:underline" onclick="voter('${a.id}','contest')">Contester</button>
+                </div>
+              </div>`).join('')}
             </div>
-            <div class="mt-2 flex gap-2">
-              <button class="text-xs text-emerald-700 hover:underline" onclick="voter('${a.id}','confirm')">Confirmer</button>
-              <button class="text-xs text-red-700 hover:underline" onclick="voter('${a.id}','contest')">Contester</button>
-            </div>
-          </div>`).join('');
+          </div>`;
+        }).filter(Boolean).join('');
+        zone.innerHTML = html;
       } catch(e){
         zone.innerHTML = '<div class="bg-white p-6 rounded-2xl border text-red-700 text-sm">Erreur de chargement : '+esc(e.message)+'</div>';
       }
