@@ -7,7 +7,6 @@
   <title>Les Audits & GÉT — Oh Dites !</title>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <!-- Supabase client SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- Favicons et Manifest -->
   <link rel="icon" type="image/png" href="./favicon-96x96.png" sizes="96x96" />
   <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
@@ -253,12 +252,19 @@
       });
     }
 
-    // ---- Intégration Supabase : proposer & lire les sources ----
+    // ---- Intégration Supabase (fetch direct PostgREST) : proposer & lire les sources ----
     (function() {
-      const supabase = window.supabase.createClient(
-        'https://trchckgeemvqlgbcrntz.supabase.co',
-        'sb_publishable_fAefpcpQfoolCPlQwBzxlg_0M9-jfRV'
-      );
+      const API = 'https://trchckgeemvqlgbcrntz.supabase.co';
+      const KEY = 'sb_publishable_fAefpcpQfoolCPlQwBzxlg_0M9-jfRV';
+      async function sapi(method, path, body){
+        const r = await fetch(API+path, {
+          method,
+          headers:{ 'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Accept':'application/json','Prefer':'return=representation' },
+          body: body?JSON.stringify(body):undefined
+        });
+        if(!r.ok){ let m='HTTP '+r.status; try{ const j=await r.json(); m=j.message||m; }catch(e){} throw new Error(m); }
+        try{ return await r.json(); }catch(e){ return null; }
+      }
 
       // 1) Soumettre une source
       const form = document.getElementById('form-source');
@@ -271,16 +277,12 @@
           const url = document.getElementById('source-url').value.trim();
           const type_source = (document.getElementById('source-type').value || 'document').trim();
           const domaine = (document.getElementById('source-domaine').value || '').trim() || null;
-          const { error } = await supabase.from('sources').insert({
-            titre, url, type_source, domaine
-          });
-          if (error) {
-            msg.textContent = 'Erreur : ' + error.message;
-          } else {
+          try {
+            await sapi('POST', '/rest/v1/sources', { titre, url, type_source, domaine });
             msg.textContent = '✅ Source déposée (en attente de vérification). Merci !';
             form.reset();
             chargerSources();
-          }
+          } catch(e){ msg.textContent = 'Erreur : ' + e.message; }
         });
       }
 
@@ -288,21 +290,18 @@
       async function chargerSources() {
         const zone = document.getElementById('liste-sources');
         if (!zone) return;
-        const { data, error } = await supabase
-          .from('sources')
-          .select('*')
-          .order('cree_le', { ascending: false })
-          .limit(10);
-        if (error) { zone.innerHTML = '<p class="text-stone-500 text-xs">Impossible de charger les sources.</p>'; return; }
-        if (!data || data.length === 0) {
-          zone.innerHTML = '<p class="text-stone-500 text-xs">Aucune source déposée. Soyez le premier à en proposer une.</p>';
-          return;
-        }
-        zone.innerHTML = data.map(s => `
-          <li class="border-b border-stone-200/60 py-2 flex flex-col">
-            <a href="${esc(s.url)}" target="_blank" rel="noopener" class="font-semibold text-emerald-700 hover:underline">${esc(s.titre)}</a>
-            <span class="text-stone-500 text-xs">${esc(s.domaine || 'général')} · ${esc(s.type_source)} · <span class="inline-block bg-amber-100 text-amber-800 rounded-full px-2 py-0.5 text-[10px]">${esc(s.statut)}</span></span>
-          </li>`).join('');
+        try {
+          const data = await sapi('GET', '/rest/v1/sources?select=*&order=cree_le.desc&limit=10');
+          if (!data || data.length === 0) {
+            zone.innerHTML = '<p class="text-stone-500 text-xs">Aucune source déposée. Soyez le premier à en proposer une.</p>';
+            return;
+          }
+          zone.innerHTML = data.map(s => `
+            <li class="border-b border-stone-200/60 py-2 flex flex-col">
+              <a href="${esc(s.url)}" target="_blank" rel="noopener" class="font-semibold text-emerald-700 hover:underline">${esc(s.titre)}</a>
+              <span class="text-stone-500 text-xs">${esc(s.domaine || 'général')} · ${esc(s.type_source)} · <span class="inline-block bg-amber-100 text-amber-800 rounded-full px-2 py-0.5 text-[10px]">${esc(s.statut)}</span></span>
+            </li>`).join('');
+        } catch(e){ zone.innerHTML = '<p class="text-red-600 text-xs">Impossible de charger les sources ('+esc(e.message)+')</p>'; }
       }
       function esc(t) { const d=document.createElement('div'); d.textContent=(t==null?'':String(t)); return d.innerHTML; }
 
