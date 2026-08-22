@@ -115,6 +115,12 @@
         const r=await fetch(API+path,{headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Accept':'application/json'}});
         if(!r.ok) throw new Error('HTTP '+r.status); return r.json();
       }
+      async function post(path, body){
+        const r=await fetch(API+path,{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(body)});
+        if(!r.ok){ let m='HTTP '+r.status; try{const j=await r.json();m=j.message||m;}catch(e){} throw new Error(m); }
+        try{return await r.json();}catch(e){return null;}
+      }
+      function chargerDomaineRefresh(){ window.location.reload(); }
       function escv(t){ const d=document.createElement('div'); d.textContent=(t==null?'':String(t)); return d.innerHTML; }
       (async function(){
         const zone=document.getElementById('contenu-domaine');
@@ -145,6 +151,11 @@
                }).join('')+
                '</div></div>';
           }
+          // créer une sous-bulle (secteur) — participatif, comme une chaîne
+          h+='<div class="mt-3 flex flex-col sm:flex-row gap-2 items-stretch">'+
+             '<input id="nvo-secteur" type="text" placeholder="Nom de la nouvelle sous-bulle (ex: Photovoltaïque, Nucléaire…)" class="flex-1 bg-stone-50 text-sm px-4 py-2.5 rounded-xl border border-stone-200 placeholder-stone-400">'+
+             '<button id="btn-creer-secteur" class="bg-stone-900 text-white text-sm font-bold px-5 py-2.5 rounded-xl hover:bg-stone-800 transition cursor-pointer">➕ Créer la sous-bulle</button>'+
+             '</div>';
           // si on explore un secteur, l'indiquer + prier d'afficher le sous-contenu
           if(secteur){
             const secCible=(secteurs||[]).find(x=>String(x.id)===String(secteur));
@@ -188,6 +199,17 @@
             h+='<div class="bg-white rounded-2xl border p-6 text-stone-500 text-sm">Aucune affirmation vérifiable pour ce domaine pour l\'instant.</div>';
           }
           zone.innerHTML=h;
+          // attacher la création de sous-bulle (secteur) — participatif
+          const nv=document.getElementById('nvo-secteur');
+          const btnC=document.getElementById('btn-creer-secteur');
+          if(btnC&&nv) btnC.addEventListener('click', async ()=>{
+            const nom=nv.value.trim();
+            if(!nom){ alert('Indiquez un nom pour la sous-bulle.'); return; }
+            try{
+              await post('/rest/v1/secteurs',{nom,domaine_id:did});
+              nv.value=''; chargerDomaineRefresh();
+            }catch(e){ alert('Erreur : '+e.message); }
+          });
         } catch(e){ zone.innerHTML='<div class="bg-red-50 border p-6 text-sm text-red-700">Erreur de chargement du domaine : '+escv(e.message)+'</div>'; }
       })();
     }
