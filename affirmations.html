@@ -80,19 +80,6 @@
     <div id="liste-affirm" class="flex flex-col gap-4">Chargement…</div>
   </main>
 
-  <!-- MODAL : motive une contestation -->
-  <div id="modal-contest" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4">
-    <div class="bg-white rounded-2xl p-6 w-full max-w-lg shadow-xl">
-      <h3 class="text-lg font-bold text-stone-900 mb-1">✗ Pourquoi contester cette affirmation ?</h3>
-      <p class="text-sm text-stone-500 mb-3">Une contestation doit être argumentée : source contradictoire, erreur factuelle, chiffre contesté…</p>
-      <textarea id="contest-motif" rows="3" class="w-full bg-stone-50 text-sm px-4 py-3 rounded-xl border border-stone-300 placeholder-stone-400" placeholder="Expliquez votre contestation…"></textarea>
-      <div class="mt-4 flex justify-end gap-3">
-        <button id="annuler-contest" class="px-5 py-2.5 rounded-xl border border-stone-300 text-sm text-stone-600 hover:bg-stone-100 transition cursor-pointer">Annuler</button>
-        <button id="valider-contest" class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-bold transition cursor-pointer">Valider la contestation</button>
-      </div>
-    </div>
-  </div>
-
   <footer class="w-full max-w-7xl mx-auto px-6 py-4 border-t border-stone-200/80 text-center text-xs text-stone-500">
     © 2026 Oh Dites ! — Espace de compréhension, pas de combat.
   </footer>
@@ -190,14 +177,6 @@
                   ${a.contestations>0 ? '<span class="text-red-700">✗ '+a.contestations+' contre.</span>' : ''}
                 </div>
                 ${a.commentaire ? '<div class="mt-2 border-l-2 border-red-300 pl-3 text-xs text-stone-600"><span class="font-semibold text-red-700">Contestation : </span>'+esc(a.commentaire)+'</div>' : ''}
-                <div class="mt-2 flex gap-3">
-                  ${localStorage.getItem('ohd_vote_'+a.id+'_confirm') ?
-                    '<button class="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full hover:underline" onclick="voter(\''+a.id+'\',\'confirm\')">✓ Annuler ma confirmation</button>' :
-                    '<button class="text-xs text-emerald-700 hover:underline" onclick="voter(\''+a.id+'\',\'confirm\')">Confirmer</button>'}
-                  ${localStorage.getItem('ohd_vote_'+a.id+'_contest') ?
-                    '<button class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full hover:underline" onclick="voter(\''+a.id+'\',\'contest\')">✗ Annuler ma contestation</button>' :
-                    '<button class="text-xs text-red-700 hover:underline" onclick="ouvrirContest(\''+a.id+'\')">Contester</button>'}
-                </div>
               </div>`).join('')}
             </div>
           </div>`;
@@ -211,52 +190,6 @@
       if (conf >= 2) return 'confirmee';          // 2+ confirmations sans contestation
       if (conf > 0 || cont > 0) return 'proposee';
       return 'proposee';
-    }
-
-    let cibleContest = null;
-
-    // Ouvre le modal de contestation (au lieu du prompt navigateur)
-    function ouvrirContest(id) {
-      cibleContest = id;
-      document.getElementById('contest-motif').value = '';
-      const m = document.getElementById('modal-contest');
-      m.classList.remove('hidden');
-      m.classList.add('flex');
-      document.getElementById('contest-motif').focus();
-    }
-    function fermerContest() {
-      const m = document.getElementById('modal-contest');
-      m.classList.add('hidden');
-      m.classList.remove('flex');
-      cibleContest = null;
-    }
-
-    document.getElementById('valider-contest').addEventListener('click', () => {
-      const motif = document.getElementById('contest-motif').value.trim();
-      if (!motif) { alert("Veuillez argumenter votre contestation."); return; }
-      if (cibleContest) { voter(cibleContest, 'contest', motif); }
-      fermerContest();
-    });
-    document.getElementById('annuler-contest').addEventListener('click', fermerContest);
-
-    async function voter(id, type, motif) {
-      const cle = 'ohd_vote_' + id + '_' + type;
-      try {
-        const cur = await api('GET', '/rest/v1/affirmations?select=confirmations,contestations,statut,commentaire&id=eq.'+encodeURIComponent(id));
-        const base = (cur && cur[0]) ? cur[0] : { confirmations:0, contestations:0, statut:'a_verifier', commentaire:null };
-        const dejaVote = !!localStorage.getItem(cle);
-
-        let conf = base.confirmations||0, cont = base.contestations||0;
-        let commentaire = base.commentaire;
-        if (type==='confirm') conf = dejaVote ? Math.max(0, conf-1) : conf+1;
-        else cont = dejaVote ? Math.max(0, cont-1) : cont+1;
-        const upd = { confirmations: conf, contestations: cont, statut: calculStatut(conf, cont) };
-        // on enregistre le motif UNIQUEMENT lors d'une nouvelle contestation argumentée
-        if (type==='contest' && !dejaVote && motif) upd.commentaire = motif.trim();
-        await api('PATCH', '/rest/v1/affirmations?id=eq.'+encodeURIComponent(id), upd);
-        if (dejaVote) localStorage.removeItem(cle); else localStorage.setItem(cle, '1');
-        charger();
-      } catch(e){ alert('Erreur : '+e.message); }
     }
 
     document.getElementById('btn-affirm').addEventListener('click', async () => {

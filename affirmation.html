@@ -95,10 +95,105 @@
             ${aff.auteur_ajout?'<span>par '+esc(aff.auteur_ajout)+'</span>':''}
             ${aff.confirmations>0?'<span class="text-emerald-700">✓ '+aff.confirmations+' confirmations</span>':''}
             ${aff.contestations>0?'<span class="text-red-700">✗ '+aff.contestations+' contestations</span>':''}
-          </div>`;
+          </div>
+          <!-- Actions : confirmer / contester (dans la page détail) -->
+          <div class="mt-4 flex flex-wrap items-center gap-3 border-t border-stone-100 pt-4">
+            <button id="action-confirm" class="px-4 py-2 rounded-xl text-sm font-bold transition cursor-pointer">Confirmer</button>
+            <button id="action-contest" class="px-4 py-2 rounded-xl text-sm font-bold border border-red-200 text-red-700 hover:bg-red-50 transition cursor-pointer">Contester</button>
+          </div>
+          <!-- Zone de motif (affichée quand on conteste) -->
+          <div id="zone-motif" class="hidden mt-3 bg-red-50 border border-red-200 rounded-xl p-4">
+            <p class="text-sm text-red-800 mb-2 font-medium">✗ Justifiez votre contestation :</p>
+            <textarea id="motif-input" rows="2" class="w-full bg-white text-sm px-3 py-2.5 rounded-xl border border-red-200 placeholder-stone-400" placeholder="Source contradictoire, erreur factuelle, chiffre contesté…"></textarea>
+            <div class="mt-2 flex justify-end gap-2">
+              <button id="motif-annuler" class="px-4 py-2 rounded-xl border border-stone-300 text-sm text-stone-600 hover:bg-stone-100 transition cursor-pointer">Annuler</button>
+              <button id="motif-valider" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-bold transition cursor-pointer">Valider la contestation</button>
+            </div>
+          </div>
+        `;
+        // connecter les actions
+        connecterActions(aff);
         chargerRessources();
         chargerFil();
       }catch(e){ document.getElementById('aff-head').innerHTML='<p class="text-red-600 text-sm">Erreur : '+esc(e.message)+'</p>'; }
+    }
+
+    function calculStatut(conf, cont){
+      if (cont > 0) return 'contestee';
+      if (conf >= 2) return 'confirmee';
+      return 'proposee';
+    }
+
+    // Connecte les boutons Confirmer/Contester sur la page détail (avec undo et motif)
+    function connecterActions(aff){
+      const btnC=document.getElementById('action-confirm');
+      const btnT=document.getElementById('action-contest');
+      const zoneM=document.getElementById('zone-motif');
+      const motif=document.getElementById('motif-input');
+      // état visuel initial selon vote déjà fait
+      rafraichirBoutons(aff);
+
+      btnC.addEventListener('click', async ()=>{
+        await voterAff();
+      });
+      btnT.addEventListener('click', async ()=>{
+        // si déjà contesté -> undo direct ; sinon ouvrir le champ motif
+        if (localStorage.getItem('ohd_vote_'+aff.id+'_contest')) {
+          await voterAff(aff.id, 'contest', null);
+        } else {
+          zoneM.classList.remove('hidden');
+          motif.focus();
+        }
+      });
+      document.getElementById('motif-annuler').addEventListener('click', ()=>{
+        zoneM.classList.add('hidden');
+        motif.value='';
+      });
+      document.getElementById('motif-valider').addEventListener('click', async ()=>{
+        const t=motif.value.trim();
+        if(!t){ alert('Veuillez justifier votre contestation.'); return; }
+        await voterAff(aff.id, 'contest', t);
+        zoneM.classList.add('hidden');
+        motif.value='';
+      });
+    }
+
+    // vote/undo une affirmation et écrit dans le fil des échanges
+    async function voterAff(idForce, typeForce, motifTexte){
+      if(idForce && typeForce){ await realiserVote(idForce, typeForce, motifTexte); return; }
+      // appel depuis le bouton 'Confirmer' : faire un toggle (confirmer OU annuler ma confirmation)
+      await realiserVote(affId, 'confirm', null);
+    }
+
+    async function realiserVote(id, type, motifTexte){
+      const cle='ohd_vote_'+id+'_'+type;
+      const deja=!!localStorage.getItem(cle);
+      const cur=await api('GET','/rest/v1/affirmations?select=confirmations,contestations,statut&id=eq.'+encodeURIComponent(id));
+      const base=(cur&&cur[0])||{confirmations:0,contestations:0,statut:'proposee'};
+      let conf=base.confirmations||0, cont=base.contestations||0;
+      if(type==='confirm') conf = deja ? Math.max(0,conf-1) : conf+1;
+      else cont = deja ? Math.max(0,cont-1) : cont+1;
+      const upd={confirmations:conf,contestations:cont,statut:calculStatut(conf,cont)};
+      if(type==='contest' && !deja && motifTexte) upd.commentaire=motifTexte;
+      await api('PATCH','/rest/v1/affirmations?id=eq.'+encodeURIComponent(id), upd);
+      // écrire l'événement dans le fil des échanges
+      if(!deja){
+        await api('POST','/rest/v1/echanges',{affirmation_id:id,type:type,auteur:'Citoyen lambda',contenu: type==='contest' ? motifTexte : null});
+      }
+      if(deja) localStorage.removeItem(cle); else localStorage.setItem(cle,'1');
+      // recharger l'en-tête et le fil
+      charger();
+    }
+
+    function rafraichirBoutons(aff){
+      const btnC=document.getElementById('action-confirm');
+      const btnT=document.getElementById('action-contest');
+      const aC=!!localStorage.getItem('ohd_vote_'+aff.id+'_confirm');
+      const aT=!!localStorage.getItem('ohd_vote_'+aff.id+'_contest');
+      btnC.className='px-4 py-2 rounded-xl text-sm font-bold transition cursor-pointer '+(aC?'bg-emerald-100 text-emerald-700':'bg-emerald-600 text-white hover:bg-emerald-700');
+      btnC.textContent = aC ? '✓ Annuler ma confirmation' : 'Confirmer';
+      btnT.className='px-4 py-2 rounded-xl text-sm font-bold transition cursor-pointer '+(aT?'bg-red-100 text-red-700':'bg-white border border-red-300 text-red-700 hover:bg-red-50');
+      btnT.textContent = aT ? '✗ Annuler ma contestation' : 'Contester';
     }
 
     async function chargerRessources(){
