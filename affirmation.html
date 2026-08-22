@@ -230,7 +230,7 @@
         if(contests>0) statut='contestee';
         else if(confirms>=2) statut='confirmee';
         else if(confirms>=1) statut='a_verifier';
-        await api('PATCH','/rest/v1/affirmations?id=eq.'+encodeURIComponent(affId),{confirmations:confirms,contestations:contests,statut});
+        await api('PATCH','/rest/v1/affirmations?id=eq.'+encodeURIComponent(affId),{confirmations:confirms,contestations:contests,statut,commentaire:null});
         chargerEntete();
       }catch(e){}
     }
