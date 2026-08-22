@@ -49,15 +49,16 @@
       </div>
     </div>
 
-    <!-- Statuts : légende -->
-    <div class="flex flex-wrap gap-2 mb-6 text-xs">
-      <span class="px-3 py-1 rounded-full bg-stone-200 text-stone-700">proposée</span>
-      <span class="px-3 py-1 rounded-full bg-yellow-100 text-yellow-800">à vérifier</span>
-      <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800">confirmée</span>
-      <span class="px-3 py-1 rounded-full bg-orange-100 text-orange-800">contestée</span>
-      <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-800">nuancée</span>
-      <span class="px-3 py-1 rounded-full bg-red-100 text-red-800">réfutée</span>
-      <span class="px-3 py-1 rounded-full bg-stone-100 text-stone-500">impossible à vérifier</span>
+    <!-- Statuts : légende cliquable (filtre) -->
+    <div id="legende-filtres" class="flex flex-wrap gap-2 mb-6 text-xs">
+      <button data-st="" class="stat-filt actif px-3 py-1.5 rounded-full border border-emerald-400 ring-2 ring-emerald-400 transition cursor-pointer">Tous</button>
+      <button data-st="a_verifier" class="stat-filt px-3 py-1.5 rounded-full bg-yellow-100 text-yellow-800 border border-transparent transition cursor-pointer">à vérifier</button>
+      <button data-st="proposee" class="stat-filt px-3 py-1.5 rounded-full bg-stone-200 text-stone-700 border border-transparent transition cursor-pointer">proposée</button>
+      <button data-st="confirmee" class="stat-filt px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-800 border border-transparent transition cursor-pointer">confirmée</button>
+      <button data-st="contestee" class="stat-filt px-3 py-1.5 rounded-full bg-orange-100 text-orange-800 border border-transparent transition cursor-pointer">contestée</button>
+      <button data-st="nuanacee" class="stat-filt px-3 py-1.5 rounded-full bg-blue-100 text-blue-800 border border-transparent transition cursor-pointer">nuancée</button>
+      <button data-st="refutee" class="stat-filt px-3 py-1.5 rounded-full bg-red-100 text-red-800 border border-transparent transition cursor-pointer">réfutée</button>
+      <button data-st="impossible" class="stat-filt px-3 py-1.5 rounded-full bg-stone-100 text-stone-500 border border-transparent transition cursor-pointer">impossible à vérifier</button>
     </div>
 
     <!-- Recherche, tri, filtre thème -->
@@ -72,16 +73,6 @@
         <option value="confirmees">Tri : plus confirmées</option>
         <option value="conteste">Tri : plus contestées</option>
         <option value="statut">Tri : par statut</option>
-      </select>
-      <select id="statut-aff" class="sm:w-52 bg-stone-50 text-sm px-4 py-2.5 rounded-xl border border-stone-200">
-        <option value="">Tous les statuts</option>
-        <option value="a_verifier">à vérifier</option>
-        <option value="proposee">proposée</option>
-        <option value="confirmee">confirmée</option>
-        <option value="contestee">contestée</option>
-        <option value="nuanacee">nuancée</option>
-        <option value="refutee">réfutée</option>
-        <option value="impossible">impossible à vérifier</option>
       </select>
     </div>
 
@@ -122,6 +113,7 @@
 
     let ToutesAff = [];
     let Sujets = [];
+    let StatutFiltre = '';
     async function charger() {
       const zone = document.getElementById('liste-affirm');
       try {
@@ -144,7 +136,7 @@
       if(q) liste = liste.filter(a => (a.texte||'').toLowerCase().includes(q));
       const th = document.getElementById('theme-aff').value;
       if(th) liste = liste.filter(a => a.sujet_id === th);
-      const st = document.getElementById('statut-aff').value;
+      const st = StatutFiltre;
       if(st) liste = liste.filter(a => a.statut === st);
       const tri = document.getElementById('tri-aff').value;
       if(tri==='confirmees') liste.sort((a,b)=>(b.confirmations||0)-(a.confirmations||0));
@@ -221,7 +213,18 @@
     document.getElementById('search-aff').addEventListener('input', afficher);
     document.getElementById('theme-aff').addEventListener('change', afficher);
     document.getElementById('tri-aff').addEventListener('change', afficher);
-    document.getElementById('statut-aff').addEventListener('change', afficher);
+
+    // Légende cliquable : filtre par statut
+    const btnsStat = document.querySelectorAll('.stat-filt');
+    btnsStat.forEach(b => {
+      b.addEventListener('click', () => {
+        btnsStat.forEach(x => { x.classList.remove('actif'); x.classList.remove('ring-2','ring-emerald-400'); });
+        b.classList.add('actif');
+        b.classList.add('ring-2','ring-emerald-400');
+        StatutFiltre = b.dataset.st || '';
+        afficher();
+      });
+    });
 
     charger();
   </script>
