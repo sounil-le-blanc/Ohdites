@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Les Audits & GÉT — Oh Dites !</title>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <!-- Supabase client SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- Favicons et Manifest -->
   <link rel="icon" type="image/png" href="./favicon-96x96.png" sizes="96x96" />
   <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
@@ -187,13 +189,87 @@
     conteneur.classList.remove('hidden');
 
     point.innerHTML = `
-      <div id="rejoindre" class="bg-stone-900 text-stone-100 rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-6 transition-all duration-500 target:ring-4 target:ring-emerald-500">
-        <div class="max-w-md">
-          <h3 class="text-xl font-bold mb-1">${entree.titre} — ouvrir le débat.</h3>
-          <p class="text-stone-400 text-sm">Rejoindre ou proposer le point d\'enquête : la documentation reste à construire, collectivement.</p>
-        </div>
-        <button onclick="alert('Formulaire : à connecter (Supabase). Ceci est un jalon MVP.')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-6 py-3 rounded-xl transition whitespace-nowrap cursor-pointer">Proposer une source</button>
-      </div>`;
+      <div id="rejoindre" class="bg-stone-900 text-stone-100 rounded-3xl p-8 transition-all duration-500 target:ring-4 target:ring-emerald-500">
+        <h3 class="text-xl font-bold mb-1">${entree.titre} — proposer une source.</h3>
+        <p class="text-stone-400 text-sm mb-4">Nous demandons un document, un rapport ou une donnée publique vérifiable. Rien ne disparaît : tout est consigné, en attente de vérification.</p>
+        <form id="form-source" class="flex flex-col gap-3">
+          <input id="source-titre" type="text" placeholder="Titre du document" required
+            class="bg-stone-800 text-stone-100 text-sm px-4 py-3 rounded-xl border border-stone-700 placeholder-stone-500">
+          <input id="source-url" type="url" placeholder="URL / lien de la source" required
+            class="bg-stone-800 text-stone-100 text-sm px-4 py-3 rounded-xl border border-stone-700 placeholder-stone-500">
+          <div class="flex gap-3">
+            <input id="source-type" type="text" placeholder="Type (rapport, article, donnée...)"
+              class="flex-1 bg-stone-800 text-stone-100 text-sm px-4 py-3 rounded-xl border border-stone-700 placeholder-stone-500">
+            <input id="source-domaine" type="hidden" value="${domaine || ''}">
+            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-6 py-3 rounded-xl transition whitespace-nowrap cursor-pointer">Proposer</button>
+          </div>
+        </form>
+        <div id="source-message" class="text-sm mt-3 text-emerald-400"></div>
+      </div>`,
+
+    // ---- Intégration Supabase : proposer & lire les sources ----
+    (function() {
+      const supabase = window.supabase.createClient(
+        'https://trchckgeemvqlgbcrntz.supabase.co',
+        'sb_publishable_fAefpcpQfoolCPlQwBzxlg_0M9-jfRV'
+      );
+
+      // 1) Soumettre une source
+      const form = document.getElementById('form-source');
+      const msg = document.getElementById('source-message');
+      if (form) {
+        form.addEventListener('submit', async (ev) => {
+          ev.preventDefault();
+          msg.textContent = 'Envoi en cours…';
+          const titre = document.getElementById('source-titre').value.trim();
+          const url = document.getElementById('source-url').value.trim();
+          const type_source = (document.getElementById('source-type').value || 'document').trim();
+          const domaine = (document.getElementById('source-domaine').value || '').trim() || null;
+          const { error } = await supabase.from('sources').insert({
+            titre, url, type_source, domaine
+          });
+          if (error) {
+            msg.textContent = 'Erreur : ' + error.message;
+          } else {
+            msg.textContent = '✅ Source déposée (en attente de vérification). Merci !';
+            form.reset();
+            chargerSources();
+          }
+        });
+      }
+
+      // 2) Afficher les sources récentes
+      async function chargerSources() {
+        const zone = document.getElementById('liste-sources');
+        if (!zone) return;
+        const { data, error } = await supabase
+          .from('sources')
+          .select('*')
+          .order('cree_le', { ascending: false })
+          .limit(10);
+        if (error) { zone.innerHTML = '<p class="text-stone-500 text-xs">Impossible de charger les sources.</p>'; return; }
+        if (!data || data.length === 0) {
+          zone.innerHTML = '<p class="text-stone-500 text-xs">Aucune source déposée. Soyez le premier à en proposer une.</p>';
+          return;
+        }
+        zone.innerHTML = data.map(s => `
+          <li class="border-b border-stone-200/60 py-2 flex flex-col">
+            <a href="${esc(s.url)}" target="_blank" rel="noopener" class="font-semibold text-emerald-700 hover:underline">${esc(s.titre)}</a>
+            <span class="text-stone-500 text-xs">${esc(s.domaine || 'général')} · ${esc(s.type_source)} · <span class="inline-block bg-amber-100 text-amber-800 rounded-full px-2 py-0.5 text-[10px]">${esc(s.statut)}</span></span>
+          </li>`).join('');
+      }
+      function esc(t) { const d=document.createElement('div'); d.textContent=(t==null?'':String(t)); return d.innerHTML; }
+
+      // 3) Injecter la section "sources récentes" après le point d'entrée
+      const pointEntree = document.getElementById('point-entree');
+      if (pointEntree && !document.getElementById('liste-sources')) {
+        const sec = document.createElement('div');
+        sec.className = 'bg-white p-6 rounded-2xl border border-stone-200/60 shadow-sm';
+        sec.innerHTML = '<h3 class="font-bold text-stone-900 mb-1">📥 Sources déposées (consignées)</h3><ul id="liste-sources"><li class="text-stone-500 text-xs">Chargement…</li></ul>';
+        pointEntree.after(sec);
+      }
+      chargerSources();
+    })();
   </script>
 
 </body>
