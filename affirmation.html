@@ -109,7 +109,11 @@
       try{
         const tudo=await api('GET','/rest/v1/echanges?affirmation_id=eq.'+encodeURIComponent(affId)+'&order=cree_le.asc');
         if(!tudo||!tudo.length){ zone.innerHTML='<p class="text-stone-500 text-sm">Aucun avis pour l\'instant. Confirmez, contestez ou commentez ci-dessus.</p>'; return; }
-        // les cartes = parent_id null ; les commentaires = parent_id !
+        // charger les réactions de tous les échanges de cette affirmation (une requête)
+        const ids=(tudo||[]).map(e=>e.id).join(',');
+        const reactions = await api('GET','/rest/v1/reactions?echange_id=in.('+ids+')');
+        const reactPar = {};
+        (reactions||[]).forEach(r=>{ (reactPar[r.echange_id]=reactPar[r.echange_id]||{like:0,dislike:0})[r.type_reaction]++; });
         const cartes=tudo.filter(e=>!e.parent_id);
         const comas=tudo.filter(e=>e.parent_id);
         let html='';
@@ -141,6 +145,11 @@
                 </div>
                 ${c.contenu?'<p class="text-sm text-stone-700 mt-2">'+esc(c.contenu)+'</p>':''}
                 ${sourcesHtml}
+                <!-- réactions de la carte -->
+                <div class="mt-2 flex items-center gap-3 text-sm">
+                  <button data-ech="${c.id}" data-type="like" class="react-btn flex items-center gap-1 text-stone-500 hover:text-emerald-600 transition cursor-pointer">👍 <span class="react-count" data-ech="${c.id}" data-t="like">${(reactPar[c.id]&&reactPar[c.id].like)||0}</span></button>
+                  <button data-ech="${c.id}" data-type="dislike" class="react-btn flex items-center gap-1 text-stone-500 hover:text-red-600 transition cursor-pointer">👎 <span class="react-count" data-ech="${c.id}" data-t="dislike">${(reactPar[c.id]&&reactPar[c.id].dislike)||0}</span></button>
+                </div>
                 <!-- commentaires de la carte -->
                 <div class="mt-3 border-t border-stone-100 pt-2">
                   ${mineursHtml || '<p class="text-xs text-stone-400">Aucun commentaire.</p>'}
@@ -158,12 +167,29 @@
         zone.querySelectorAll('.retirer-carte').forEach(b=>b.addEventListener('click',()=>retirerCarte(b.dataset.carteId)));
         zone.querySelectorAll('.btn-commenter-carte').forEach(b=>b.addEventListener('click',()=>posterCommentaire(b.dataset.parent)));
         zone.querySelectorAll('.retirer-comment').forEach(b=>b.addEventListener('click',()=>retirerCommentaire(b.dataset.commentId)));
+        zone.querySelectorAll('.react-btn').forEach(b=>b.addEventListener('click',()=>react(b.dataset.ech, b.dataset.type)));
       }catch(e){ zone.innerHTML='<p class="text-red-600 text-sm">Erreur : '+esc(e.message)+'</p>'; }
     }
 
+    // like/dislike (god mode : on ajoute/retire à chaque clic)
+    async function react(echId, type){
+      try{
+        // god mode : chaque clic ajoute une réaction de ce type
+        await api('POST','/rest/v1/reactions',{echange_id:echId,type_reaction:type,auteur:'Citoyen lambda'});
+        chargerFil();
+      }catch(e){ alert('Erreur réaction : '+e.message); }
+    }
+
     function renderCommentaire(m){
+      const likes=(reactPar[m.id]&&reactPar[m.id].like)||0;
+      const dislikes=(reactPar[m.id]&&reactPar[m.id].dislike)||0;
       return `<div class="flex items-start justify-between gap-2 py-1">
-        <div class="flex-1"><span class="text-xs text-stone-400">${esc(m.auteur||'Citoyen')}</span><p class="text-sm text-stone-700">${esc(m.contenu||'')}</p></div>
+        <div class="flex-1"><span class="text-xs text-stone-400">${esc(m.auteur||'Citoyen')}</span><div class="text-sm text-stone-700">${esc(m.contenu||'')}
+          <div class="flex items-center gap-3 mt-1 text-xs">
+            <button data-ech="${m.id}" data-type="like" class="react-btn flex items-center gap-1 text-stone-400 hover:text-emerald-600 transition cursor-pointer">👍 <span class="react-count" data-ech="${m.id}" data-t="like">${likes}</span></button>
+            <button data-ech="${m.id}" data-type="dislike" class="react-btn flex items-center gap-1 text-stone-400 hover:text-red-600 transition cursor-pointer">👎 <span class="react-count" data-ech="${m.id}" data-t="dislike">${dislikes}</span></button>
+          </div>
+        </div></div>
         <button data-comment-id="${m.id}" class="retirer-comment text-[10px] text-stone-400 hover:text-red-600 transition cursor-pointer">🗑 retirer</button>
       </div>`;
     }
