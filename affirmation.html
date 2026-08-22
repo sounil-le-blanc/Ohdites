@@ -55,6 +55,7 @@
     <div class="mt-6">
       <h3 class="font-bold text-stone-900 mb-3">💬 Fil des échanges</h3>
       <div id="fil" class="flex flex-col gap-3"><p class="text-stone-400 text-sm">Chargement…</p></div>
+      <div id="debug-box" class="hidden text-xs text-stone-400 mt-3 font-mono"></div>
     </div>
   </main>
 
@@ -265,20 +266,28 @@
 
     // Retirer un de mes échanges (vote/remarque) et corriger le compteur
     async function retirerEchange(echId, type){
+      const dbg=document.getElementById('debug-box');
+      const log=(m)=>{ dbg.classList.remove('hidden'); dbg.textContent += '\n'+m; };
+      log('retirerEchange('+echId+','+type+')');
       try{
+        log('DELETE echanges…');
         await api('DELETE','/rest/v1/echanges?id=eq.'+encodeURIComponent(echId));
-        // recalculer le compteur depuis le fil restant
+        log('GET fil après delete…');
         const fil=await api('GET','/rest/v1/echanges?affirmation_id=eq.'+encodeURIComponent(affId));
+        log('fil='+((fil||[]).length)+' échanges');
         const confirms=(fil||[]).filter(e=>e.type==='confirm').length;
         const contests=(fil||[]).filter(e=>e.type==='contest').length;
+        log('conf='+confirms+' cont='+contests);
         const upd={confirmations:confirms,contestations:contests,statut:calculStatut(confirms,contests)};
         await api('PATCH','/rest/v1/affirmations?id=eq.'+encodeURIComponent(affId),upd);
-        // nettoyer localStorage du vote retiré
         localStorage.removeItem('ohd_vote_'+affId+'_'+type);
+        log('PATCH ok');
         charger();
         chargerFil();
-      }catch(e){ alert('Erreur : '+e.message); }
+      }catch(e){ log('ERREUR : '+e.message); alert('Erreur retrait : '+e.message); }
     }
+    // Exposer explicitement pour les listeners JS (robuste)
+    window.retirerEchange = retirerEchange;
 
     charger();
     chargerFil();
