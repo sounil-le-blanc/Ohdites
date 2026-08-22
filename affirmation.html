@@ -146,13 +146,17 @@
             const estMoi = (e.auteur||'') === 'Citoyen lambda';
             return `<div class="rounded-xl border-l-2 border-stone-200 pl-3 py-1">
               <div class="flex items-center gap-2 text-xs"><span class="${couleur} px-2 py-0.5 rounded-full">${badge}</span><span class="text-stone-400">${esc(e.auteur||'Citoyen')}</span>
-              ${estMoi?`<button class="ml-auto text-[10px] text-stone-400 hover:text-red-600" onclick="retirerEchange('${e.id}','${e.type}')">Retirer</button>`:''}
+              ${estMoi?`<button data-id="${e.id}" data-type="${e.type}" class="retirer-btn ml-auto text-[10px] text-stone-400 hover:text-red-600">Retirer</button>`:''}
               </div>
               ${contenant ? `<p class="text-sm text-stone-700 mt-1">${esc(contenant)}</p>` : ''}
             </div>`;
           }).join('');
         }
         zone.innerHTML=html;
+        // attacher les boutons 'Retirer' (robuste, plus fiable que onclick inline)
+        zone.querySelectorAll('.retirer-btn').forEach(btn=>{
+          btn.addEventListener('click', ()=> retirerEchange(btn.dataset.id, btn.dataset.type));
+        });
       }catch(e){ zone.innerHTML='<p class="text-red-600 text-sm">Erreur fil : '+esc(e.message)+'</p>'; }
     }
 
