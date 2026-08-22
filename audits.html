@@ -128,6 +128,27 @@
           const affs=await get('/rest/v1/affirmations?select=texte,statut,confirmations,contestations,commentaire,dossier_id&dossier_id=in.('+(dossiers.map(d=>d.id).join(',')||'00000000-0000-0000-0000-000000000000')+')');
           let h='';
 
+          // Bloc EXPLORATEUR : sous-bulles du graphe (secteurs + sujets liés au domaine)
+          const secteurs=await get('/rest/v1/secteurs?select=id,nom&domaine_id=eq.'+did+'&order=nom');
+          // sujets liés (via affirmations.documents.sujets et documents du domaine) — simples pour commencer
+          const sujetsDom=await get('/rest/v1/sujets?select=id,nom&order=nom');
+          h+='<div class="bg-white rounded-2xl border border-stone-200/60 shadow-sm p-6">'+
+             '<h3 class="font-bold text-stone-900 mb-2">🔍 Explorer ce domaine (graphe)</h3>'+
+             '<p class="text-xs text-stone-500 mb-3">Du grand domaine vers les sous-bulles : secteurs, sujets, dossiers. Tout peut appartenir à plusieurs bulles.</p>';
+          // secteurs
+          if(secteurs&&secteurs.length){
+            h+='<div class="mb-3"><span class="text-xs font-bold uppercase tracking-wider text-stone-500">Secteurs</span><div class="flex flex-wrap gap-2 mt-1">'+
+               secteurs.map(s=>`<a href="audits.html?domaine=${encodeURIComponent(domaine)}&secteur=${s.id}" class="px-3 py-1.5 rounded-full bg-stone-100 text-stone-700 text-xs border border-stone-200 hover:bg-emerald-50 hover:border-emerald-300 transition">${escv(s.nom)}</a>`).join('')+
+               '</div></div>';
+          }
+          // sujets (tous, puisqu'ils peuvent traverser les domaines)
+          if(sujetsDom&&sujetsDom.length){
+            h+='<div><span class="text-xs font-bold uppercase tracking-wider text-stone-500">Sujets transversaux</span><div class="flex flex-wrap gap-2 mt-1">'+
+               sujetsDom.map(s=>`<a href="affirmations.html?theme=${s.id}" class="px-3 py-1.5 rounded-full bg-white text-stone-700 text-xs border border-stone-300 hover:bg-blue-50 hover:border-blue-300 transition">🏷 ${escv(s.nom)}</a>`).join('')+
+               '</div></div>';
+          }
+          h+='</div>';
+
           // Bloc : dossiers du domaine
           if(dossiers&&dossiers.length){
             h+='<div class="bg-white rounded-2xl border border-stone-200/60 shadow-sm p-6">'+
