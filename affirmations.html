@@ -181,7 +181,7 @@
             ${list.map(a => `
               <div class="bg-white p-5 rounded-2xl border border-stone-200/60 shadow-sm">
                 <div class="flex items-start justify-between gap-3">
-                  <p class="text-stone-800 font-medium">${esc(a.texte)}</p>
+                  <a href="affirmation.html?id=${esc(a.id)}" class="text-stone-800 font-medium hover:text-emerald-700 hover:underline">${esc(a.texte)}</a>
                 </div>
                 <div class="mt-2 text-xs text-stone-500 flex flex-wrap gap-3">
                   ${a.sujets && a.sujets.nom ? '<span class="text-stone-400">🏷 '+esc(a.sujets.nom)+'</span>' : ''}

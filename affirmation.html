@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Affirmation — Oh Dites !</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="icon" type="image/png" href="./favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+  <link rel="shortcut icon" href="./favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
+  <link rel="manifest" href="./site.webmanifest" />
+</head>
+<body class="bg-stone-50 text-stone-800 font-sans min-h-screen flex flex-col">
+  <header class="w-full max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-stone-200/80">
+    <div class="flex items-center gap-3">
+      <img src="images/cerveau-mains-relief.webp" alt="Logo" class="w-8 h-8 object-contain select-none pointer-events-none">
+      <a href="index.html" class="text-2xl font-black tracking-tight text-emerald-700">Oh Dites !</a>
+    </div>
+    <nav class="flex gap-8 text-sm font-semibold text-stone-600">
+      <a href="index.html" class="hover:text-emerald-700 transition pb-1">Accueil</a>
+      <a href="audits.html" class="hover:text-emerald-700 transition pb-1">Les Audits (GÉT)</a>
+      <a href="affirmations.html" class="hover:text-emerald-700 transition pb-1">Affirmations</a>
+      <a href="dossier.html" class="hover:text-emerald-700 transition pb-1">Dossiers</a>
+      <a href="charte.html" class="hover:text-emerald-700 transition pb-1">Charte & Valeurs</a>
+      <a href="fun.html" class="hover:text-emerald-700 transition pb-1">Espace F.U.N.</a>
+    </nav>
+  </header>
+
+  <main class="w-full max-w-4xl mx-auto px-6 py-10 flex-grow">
+    <a href="affirmations.html" class="text-sm text-emerald-700 hover:underline">&larr; Retour aux affirmations</a>
+    <div id="aff-head" class="mt-4 bg-white rounded-2xl border border-stone-200/60 p-6 shadow-sm">
+      <p class="text-stone-400 text-sm">Chargement de l'affirmation…</p>
+    </div>
+
+    <!-- Ressources liées -->
+    <div id="ressources" class="mt-6 bg-white rounded-2xl border border-stone-200/60 p-6">
+      <h3 class="font-bold text-stone-900 mb-3">📚 Ressources documentaires</h3>
+      <div id="liste-ressources"><p class="text-stone-400 text-sm">Chargement…</p></div>
+      <form id="form-ressource" class="mt-4 flex flex-col sm:flex-row gap-2">
+        <input id="res-titre" type="text" placeholder="Titre du document" class="flex-1 bg-stone-50 text-sm px-4 py-2.5 rounded-xl border border-stone-200" required>
+        <input id="res-url" type="url" placeholder="URL" class="flex-1 bg-stone-50 text-sm px-4 py-2.5 rounded-xl border border-stone-200">
+        <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition cursor-pointer">Lier</button>
+      </form>
+      <p id="res-msg" class="text-sm text-emerald-600 mt-2"></p>
+    </div>
+
+    <!-- Fil des échanges -->
+    <div class="mt-6 bg-white rounded-2xl border border-stone-200/60 p-6">
+      <h3 class="font-bold text-stone-900 mb-3">💬 Fil des échanges</h3>
+      <div id="fil" class="flex flex-col gap-3"><p class="text-stone-400 text-sm">Chargement…</p></div>
+      <!-- Ajouter un commentaire -->
+      <div class="mt-4 flex flex-col gap-2">
+        <textarea id="nv-comment" rows="2" class="bg-stone-50 text-sm px-4 py-3 rounded-xl border border-stone-200 placeholder-stone-400" placeholder="Ajouter une remarque argumentée…"></textarea>
+        <div class="flex justify-end">
+          <button id="btn-comment" class="bg-stone-800 hover:bg-stone-900 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition cursor-pointer">Ajouter au fil</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="w-full max-w-7xl mx-auto px-6 py-4 border-t border-stone-200/80 text-center text-xs text-stone-500">
+    © 2026 Oh Dites ! — Espace de compréhension, pas de combat.
+  </footer>
+
+  <script>
+    const API = 'https://trchckgeemvqlgbcrntz.supabase.co';
+    const KEY = 'sb_publishable_fAefpcpQfoolCPlQwBzxlg_0M9-jfRV';
+    const params = new URLSearchParams(window.location.search);
+    const affId = params.get('id');
+
+    const STATUT = { 'proposee':'proposée','a_verifier':'à vérifier','confirmee':'confirmée','contestee':'contestée','nuanacee':'nuancée','refutee':'réfutée','impossible':'impossible à vérifier' };
+    const COUL = { 'proposee':'bg-stone-200 text-stone-700','a_verifier':'bg-yellow-100 text-yellow-800','confirmee':'bg-emerald-100 text-emerald-800','contestee':'bg-orange-100 text-orange-800','nuanacee':'bg-blue-100 text-blue-800','refutee':'bg-red-100 text-red-800','impossible':'bg-stone-100 text-stone-500' };
+    function esc(t){ const d=document.createElement('div'); d.textContent=(t==null?'':String(t)); return d.innerHTML; }
+    async function api(method, path, body){
+      const r=await fetch(API+path,{method,headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Accept':'application/json','Prefer':'return=representation'},body:body?JSON.stringify(body):undefined});
+      if(!r.ok){ let m='HTTP '+r.status; try{const j=await r.json();m=j.message||m;}catch(e){} throw new Error(m); }
+      try{return await r.json();}catch(e){return null;}
+    }
+
+    async function charger(){
+      if(!affId){ document.getElementById('aff-head').innerHTML='<p class="text-red-600 text-sm">Aucune affirmation sélectionnée.</p>'; return; }
+      try{
+        const a = await api('GET','/rest/v1/affirmations?select=*,sujets(nom)&id=eq.'+encodeURIComponent(affId));
+        const aff = a && a[0];
+        if(!aff){ document.getElementById('aff-head').innerHTML='<p class="text-red-600 text-sm">Affirmation introuvable.</p>'; return; }
+        const head=document.getElementById('aff-head');
+        head.innerHTML=`
+          <div class="flex items-start justify-between gap-3">
+            <p class="text-lg font-medium text-stone-900">${esc(aff.texte)}</p>
+            <span class="shrink-0 text-xs px-3 py-1 rounded-full ${COUL[aff.statut]||'bg-stone-200'}">${STATUT[aff.statut]||aff.statut}</span>
+          </div>
+          <div class="mt-3 text-xs text-stone-500 flex flex-wrap gap-3">
+            ${aff.sujets&&aff.sujets.nom?'<span class="text-stone-400">🏷 '+esc(aff.sujets.nom)+'</span>':''}
+            ${aff.auteur_ajout?'<span>par '+esc(aff.auteur_ajout)+'</span>':''}
+            ${aff.confirmations>0?'<span class="text-emerald-700">✓ '+aff.confirmations+' confirmations</span>':''}
+            ${aff.contestations>0?'<span class="text-red-700">✗ '+aff.contestations+' contestations</span>':''}
+          </div>`;
+        chargerRessources();
+        chargerFil();
+      }catch(e){ document.getElementById('aff-head').innerHTML='<p class="text-red-600 text-sm">Erreur : '+esc(e.message)+'</p>'; }
+    }
+
+    async function chargerRessources(){
+      const zone=document.getElementById('liste-ressources');
+      try{
+        // documents liés via affirmation_documents
+        const lien = await api('GET','/rest/v1/affirmation_documents?select=document_id&affirmation_id=eq.'+encodeURIComponent(affId));
+        if(!lien || !lien.length){ zone.innerHTML='<p class="text-stone-500 text-sm">Aucune ressource liée pour l\'instant.</p>'; return; }
+        const ids = lien.map(l=>l.document_id).join(',');
+        const docs = await api('GET','/rest/v1/documents?select=titre,url,type_document&id=in.('+ids+')');
+        zone.innerHTML='<ul class="space-y-1">'+docs.map(d=>`
+          <li class="text-sm"><a href="${esc(d.url)}" target="_blank" rel="noopener" class="text-emerald-700 hover:underline">• ${esc(d.titre)}</a> <span class="text-stone-400">(${esc(d.type_document||'')})</span></li>`).join('')+'</ul>';
+      }catch(e){ zone.innerHTML='<p class="text-red-600 text-sm">Erreur ressources : '+esc(e.message)+'</p>'; }
+    }
+
+    async function chargerFil(){
+      const zone=document.getElementById('fil');
+      try{
+        const fil = await api('GET','/rest/v1/echanges?affirmation_id=eq.'+encodeURIComponent(affId)+'&order=cree_le.asc');
+        if(!fil || !fil.length){ zone.innerHTML='<p class="text-stone-500 text-sm">Aucun échange pour l\'instant.</p>'; return; }
+        zone.innerHTML=fil.map(e=>{
+          let badge='', couleur='';
+          if(e.type==='confirm'){ badge='✓ confirmation'; couleur='text-emerald-700 bg-emerald-50'; }
+          else if(e.type==='contest'){ badge='✗ contestation'; couleur='text-red-700 bg-red-50'; }
+          else { badge='💬 remarque'; couleur='text-stone-600 bg-stone-100'; }
+          const ident = esc(e.auteur||'Citoyen');
+          return `<div class="border-l-2 border-stone-200 pl-3 py-1">
+            <div class="flex items-center gap-2 text-xs"><span class="${couleur} px-2 py-0.5 rounded-full">${badge}</span><span class="text-stone-400">${ident}</span></div>
+            <p class="text-sm text-stone-700 mt-1">${esc(e.contenu||'')}</p>
+          </div>`;
+        }).join('');
+      }catch(e){ zone.innerHTML='<p class="text-red-600 text-sm">Erreur fil : '+esc(e.message)+'</p>'; }
+    }
+
+    // Lier une ressource documentaire
+    document.getElementById('form-ressource').addEventListener('submit', async (ev)=>{
+      ev.preventDefault();
+      const titre=document.getElementById('res-titre').value.trim();
+      const url=document.getElementById('res-url').value.trim();
+      const msg=document.getElementById('res-msg');
+      if(!titre){ msg.textContent='Titre requis'; return; }
+      try{
+        // créer le document puis le lier
+        const doc=await api('POST','/rest/v1/documents',{titre,url:url||null,type_document:'ressource'});
+        if(doc && doc[0]){
+          await api('POST','/rest/v1/affirmation_documents',{affirmation_id:affId,document_id:doc[0].id});
+        }
+        msg.textContent='✅ Ressource liée !';
+        document.getElementById('res-titre').value='';
+        document.getElementById('res-url').value='';
+        chargerRessources();
+      }catch(e){ msg.textContent='Erreur : '+e.message; }
+    });
+
+    // Ajouter au fil des échanges
+    document.getElementById('btn-comment').addEventListener('click', async ()=>{
+      const contenu=document.getElementById('nv-comment').value.trim();
+      const msg=document.getElementById('res-msg');
+      if(!contenu){ alert('Veuillez écrire une remarque.'); return; }
+      try{
+        await api('POST','/rest/v1/echanges',{affirmation_id:affId,type:'commentaire',auteur:'Citoyen lambda',contenu});
+        document.getElementById('nv-comment').value='';
+        chargerFil();
+      }catch(e){ msg.textContent='Erreur : '+e.message; }
+    });
+
+    charger();
+  </script>
+</body>
+</html>
