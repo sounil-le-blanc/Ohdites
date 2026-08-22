@@ -33,29 +33,28 @@
       <p class="text-stone-400 text-sm">Chargement de l'affirmation…</p>
     </div>
 
-    <!-- Ressources liées -->
-    <div id="ressources" class="mt-6 bg-white rounded-2xl border border-stone-200/60 p-6">
-      <h3 class="font-bold text-stone-900 mb-3">📚 Ressources documentaires</h3>
-      <div id="liste-ressources"><p class="text-stone-400 text-sm">Chargement…</p></div>
-      <form id="form-ressource" class="mt-4 flex flex-col sm:flex-row gap-2">
-        <input id="res-titre" type="text" placeholder="Titre du document" class="flex-1 bg-stone-50 text-sm px-4 py-2.5 rounded-xl border border-stone-200" required>
-        <input id="res-url" type="url" placeholder="URL" class="flex-1 bg-stone-50 text-sm px-4 py-2.5 rounded-xl border border-stone-200">
-        <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition cursor-pointer">Lier</button>
-      </form>
-      <p id="res-msg" class="text-sm text-emerald-600 mt-2"></p>
+    <!-- BOÎTE DE POST UNIQUE : confirmer / contester / parler / ajouter une ressource -->
+    <div class="mt-6 bg-white rounded-2xl border border-stone-200/60 p-5">
+      <div class="flex flex-wrap gap-2 mb-3" id="barre-actions">
+        <button data-act="confirm" class="post-act px-4 py-2 rounded-xl text-sm font-bold bg-emerald-600 text-white transition cursor-pointer">✓ Confirmer</button>
+        <button data-act="contest" class="post-act px-4 py-2 rounded-xl text-sm font-bold text-red-700 border border-red-300 hover:bg-red-50 transition cursor-pointer">✗ Contester</button>
+        <button data-act="parler" class="post-act px-4 py-2 rounded-xl text-sm font-bold text-stone-700 border border-stone-300 hover:bg-stone-100 transition cursor-pointer">💬 Parler</button>
+        <button data-act="ressource" class="post-act px-4 py-2 rounded-xl text-sm font-bold text-stone-700 border border-stone-300 hover:bg-stone-100 transition cursor-pointer">🔗 Ajouter une ressource</button>
+      </div>
+      <textarea id="post-texte" rows="2" class="w-full bg-stone-50 text-sm px-4 py-3 rounded-xl border border-stone-200 placeholder-stone-400" placeholder="Votre message ou le motif de votre action…"></textarea>
+      <div id="post-ressource" class="hidden flex flex-col sm:flex-row gap-2 mt-2">
+        <input id="res-titre" type="text" placeholder="Titre du document" class="flex-1 bg-stone-50 text-sm px-4 py-2.5 rounded-xl border border-stone-200">
+        <input id="res-url" type="url" placeholder="URL de la ressource" class="flex-1 bg-stone-50 text-sm px-4 py-2.5 rounded-xl border border-stone-200">
+      </div>
+      <div class="mt-3 flex justify-end">
+        <button id="btn-poster" class="bg-stone-900 hover:bg-stone-800 text-white text-sm font-bold px-6 py-2.5 rounded-xl transition cursor-pointer">Poster</button>
+      </div>
     </div>
 
-    <!-- Fil des échanges -->
-    <div class="mt-6 bg-white rounded-2xl border border-stone-200/60 p-6">
+    <!-- FIL DES ÉCHANGES : tout descend ici -->
+    <div class="mt-6">
       <h3 class="font-bold text-stone-900 mb-3">💬 Fil des échanges</h3>
       <div id="fil" class="flex flex-col gap-3"><p class="text-stone-400 text-sm">Chargement…</p></div>
-      <!-- Ajouter un commentaire -->
-      <div class="mt-4 flex flex-col gap-2">
-        <textarea id="nv-comment" rows="2" class="bg-stone-50 text-sm px-4 py-3 rounded-xl border border-stone-200 placeholder-stone-400" placeholder="Ajouter une remarque argumentée…"></textarea>
-        <div class="flex justify-end">
-          <button id="btn-comment" class="bg-stone-800 hover:bg-stone-900 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition cursor-pointer">Ajouter au fil</button>
-        </div>
-      </div>
     </div>
   </main>
 
@@ -78,14 +77,17 @@
       try{return await r.json();}catch(e){return null;}
     }
 
+    // ---------- état global de l'action sélectionnée ----------
+    let actionCourante = 'confirm';
+
+    // ---------- en-tête de l'affirmation ----------
     async function charger(){
       if(!affId){ document.getElementById('aff-head').innerHTML='<p class="text-red-600 text-sm">Aucune affirmation sélectionnée.</p>'; return; }
       try{
         const a = await api('GET','/rest/v1/affirmations?select=*,sujets(nom)&id=eq.'+encodeURIComponent(affId));
         const aff = a && a[0];
         if(!aff){ document.getElementById('aff-head').innerHTML='<p class="text-red-600 text-sm">Affirmation introuvable.</p>'; return; }
-        const head=document.getElementById('aff-head');
-        head.innerHTML=`
+        document.getElementById('aff-head').innerHTML=`
           <div class="flex items-start justify-between gap-3">
             <p class="text-lg font-medium text-stone-900">${esc(aff.texte)}</p>
             <span class="shrink-0 text-xs px-3 py-1 rounded-full ${COUL[aff.statut]||'bg-stone-200'}">${STATUT[aff.statut]||aff.statut}</span>
@@ -95,76 +97,119 @@
             ${aff.auteur_ajout?'<span>par '+esc(aff.auteur_ajout)+'</span>':''}
             ${aff.confirmations>0?'<span class="text-emerald-700">✓ '+aff.confirmations+' confirmations</span>':''}
             ${aff.contestations>0?'<span class="text-red-700">✗ '+aff.contestations+' contestations</span>':''}
-          </div>
-          <!-- Actions : confirmer / contester (dans la page détail) -->
-          <div class="mt-4 flex flex-wrap items-center gap-3 border-t border-stone-100 pt-4">
-            <button id="action-confirm" class="px-4 py-2 rounded-xl text-sm font-bold transition cursor-pointer">Confirmer</button>
-            <button id="action-contest" class="px-4 py-2 rounded-xl text-sm font-bold border border-red-200 text-red-700 hover:bg-red-50 transition cursor-pointer">Contester</button>
-          </div>
-          <!-- Zone de motif (affichée quand on conteste) -->
-          <div id="zone-motif" class="hidden mt-3 bg-red-50 border border-red-200 rounded-xl p-4">
-            <p class="text-sm text-red-800 mb-2 font-medium">✗ Justifiez votre contestation :</p>
-            <textarea id="motif-input" rows="2" class="w-full bg-white text-sm px-3 py-2.5 rounded-xl border border-red-200 placeholder-stone-400" placeholder="Source contradictoire, erreur factuelle, chiffre contesté…"></textarea>
-            <div class="mt-2 flex justify-end gap-2">
-              <button id="motif-annuler" class="px-4 py-2 rounded-xl border border-stone-300 text-sm text-stone-600 hover:bg-stone-100 transition cursor-pointer">Annuler</button>
-              <button id="motif-valider" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-bold transition cursor-pointer">Valider la contestation</button>
-            </div>
-          </div>
-        `;
-        // connecter les actions
-        connecterActions(aff);
-        chargerRessources();
+          </div>`;
         chargerFil();
       }catch(e){ document.getElementById('aff-head').innerHTML='<p class="text-red-600 text-sm">Erreur : '+esc(e.message)+'</p>'; }
     }
 
-    function calculStatut(conf, cont){
-      if (cont > 0) return 'contestee';
-      if (conf >= 2) return 'confirmee';
-      return 'proposee';
+    // ---------- fil des échanges ----------
+    async function chargerFil(){
+      const zone=document.getElementById('fil');
+      try{
+        const fil = await api('GET','/rest/v1/echanges?affirmation_id=eq.'+encodeURIComponent(affId)+'&order=cree_le.asc');
+        // + les ressources liées (on les montre comme des événements docs)
+        const liens = await api('GET','/rest/v1/affirmation_documents?select=document_id&affirmation_id=eq.'+encodeURIComponent(affId));
+        if((!fil || !fil.length) && (!liens||!liens.length)){ zone.innerHTML='<p class="text-stone-500 text-sm">Aucun échange pour l\'instant. Soyez le premier à réagir ci-dessus.</p>'; return; }
+        let html='';
+        // ressources liées d'abord (contexte documentaire)
+        if(liens && liens.length){
+          const ids=liens.map(l=>l.document_id).join(',');
+          const docs=await api('GET','/rest/v1/documents?select=titre,url,type_document&id=in.('+ids+')');
+          if(docs&&docs.length){
+            html += `<div class="rounded-xl border-l-2 border-emerald-400 pl-3 py-1">
+              <div class="text-xs"><span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full">🔗 ressources liées</span></div>
+              <ul class="mt-1">${docs.map(d=>`<li class="text-sm"><a href="${esc(d.url)}" target="_blank" rel="noopener" class="text-emerald-700 hover:underline">📄 ${esc(d.titre)}</a> <span class="text-stone-400">(${esc(d.type_document||'ressource')})</span></li>`).join('')}</ul>
+            </div>`;
+          }
+        }
+        // événements du fil
+        if(fil && fil.length){
+          html += fil.map(e=>{
+            let badge='', couleur='';
+            if(e.type==='confirm'){ badge='✓ confirmation'; couleur='text-emerald-700 bg-emerald-50'; }
+            else if(e.type==='contest'){ badge='✗ contestation'; couleur='text-red-700 bg-red-50'; }
+            else { badge='💬 remarque'; couleur='text-stone-600 bg-stone-100'; }
+            const contenant = e.contenu || (e.type==='confirm' ? 'a confirmé cette affirmation' : '');
+            return `<div class="rounded-xl border-l-2 border-stone-200 pl-3 py-1">
+              <div class="flex items-center gap-2 text-xs"><span class="${couleur} px-2 py-0.5 rounded-full">${badge}</span><span class="text-stone-400">${esc(e.auteur||'Citoyen')}</span></div>
+              ${contenant ? `<p class="text-sm text-stone-700 mt-1">${esc(contenant)}</p>` : ''}
+            </div>`;
+          }).join('');
+        }
+        zone.innerHTML=html;
+      }catch(e){ zone.innerHTML='<p class="text-red-600 text-sm">Erreur fil : '+esc(e.message)+'</p>'; }
     }
 
-    // Connecte les boutons Confirmer/Contester sur la page détail (avec undo et motif)
-    function connecterActions(aff){
-      const btnC=document.getElementById('action-confirm');
-      const btnT=document.getElementById('action-contest');
-      const zoneM=document.getElementById('zone-motif');
-      const motif=document.getElementById('motif-input');
-      // état visuel initial selon vote déjà fait
-      rafraichirBoutons(aff);
-
-      btnC.addEventListener('click', async ()=>{
-        await voterAff();
-      });
-      btnT.addEventListener('click', async ()=>{
-        // si déjà contesté -> undo direct ; sinon ouvrir le champ motif
-        if (localStorage.getItem('ohd_vote_'+aff.id+'_contest')) {
-          await voterAff(aff.id, 'contest', null);
+    // ---------- boîte de post : sélecteur d'action ----------
+    document.querySelectorAll('.post-act').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        actionCourante = btn.dataset.act;
+        // styler le bouton actif
+        document.querySelectorAll('.post-act').forEach(b=>{
+          b.classList.remove('bg-emerald-600','text-white','actif');
+          // reset styles par défaut pour non-ressource
+        });
+        // réappliquer style selon l'action
+        const styles = {
+          confirm: ['bg-emerald-600','text-white','border-emerald-600'],
+          contest: ['text-red-700','border-red-300'],
+          parler: ['text-stone-700','border-stone-300'],
+          ressource: ['text-stone-700','border-stone-300']
+        };
+        btn.classList.add(...(styles[actionCourante]||[]));
+        // montrer/cacher les champs ressource
+        const zoneRes=document.getElementById('post-ressource');
+        const ta=document.getElementById('post-texte');
+        if(actionCourante==='ressource'){
+          zoneRes.classList.remove('hidden');
+          zoneRes.classList.add('flex');
+          ta.classList.add('hidden');
         } else {
-          zoneM.classList.remove('hidden');
-          motif.focus();
+          zoneRes.classList.add('hidden');
+          zoneRes.classList.remove('flex');
+          ta.classList.remove('hidden');
+          ta.placeholder = actionCourante==='contest' ? 'Justifiez votre contestation (source, erreur, chiffre…)…'
+                               : actionCourante==='parler' ? 'Votre remarque argumentée…' : 'Message (optionnel pour confirmer)…';
         }
       });
-      document.getElementById('motif-annuler').addEventListener('click', ()=>{
-        zoneM.classList.add('hidden');
-        motif.value='';
-      });
-      document.getElementById('motif-valider').addEventListener('click', async ()=>{
-        const t=motif.value.trim();
-        if(!t){ alert('Veuillez justifier votre contestation.'); return; }
-        await voterAff(aff.id, 'contest', t);
-        zoneM.classList.add('hidden');
-        motif.value='';
-      });
-    }
+    });
 
-    // vote/undo une affirmation et écrit dans le fil des échanges
-    async function voterAff(idForce, typeForce, motifTexte){
-      if(idForce && typeForce){ await realiserVote(idForce, typeForce, motifTexte); return; }
-      // appel depuis le bouton 'Confirmer' : faire un toggle (confirmer OU annuler ma confirmation)
-      await realiserVote(affId, 'confirm', null);
-    }
+    // ---------- bouton Poster ----------
+    document.getElementById('btn-poster').addEventListener('click', async ()=>{
+      const ta=document.getElementById('post-texte');
+      const texte=ta.value.trim();
+      const msg=actionCourante;
+      try{
+        if(actionCourante==='confirm'){
+          await realiserVote(affId,'confirm',null);
+          ta.value='';
+        }
+        else if(actionCourante==='contest'){
+          if(!texte){ alert('Veuillez justifier votre contestation.'); return; }
+          await realiserVote(affId,'contest',texte);
+          ta.value='';
+        }
+        else if(actionCourante==='parler'){
+          if(!texte){ alert('Veuillez écrire une remarque.'); return; }
+          await api('POST','/rest/v1/echanges',{affirmation_id:affId,type:'commentaire',auteur:'Citoyen lambda',contenu:texte});
+          ta.value='';
+        }
+        else if(actionCourante==='ressource'){
+          const titre=document.getElementById('res-titre').value.trim();
+          const url=document.getElementById('res-url').value.trim();
+          if(!titre){ alert('Titre de la ressource requis.'); return; }
+          const doc=await api('POST','/rest/v1/documents',{titre,url:url||null,type_document:'ressource'});
+          if(doc&&doc[0]) await api('POST','/rest/v1/affirmation_documents',{affirmation_id:affId,document_id:doc[0].id});
+          document.getElementById('res-titre').value='';
+          document.getElementById('res-url').value='';
+        }
+        charger();
+        chargerFil();
+      }catch(e){ alert('Erreur : '+e.message); }
+    });
 
+    // ---------- vote/undo ----------
+    function calculStatut(conf, cont){ if(cont>0) return 'contestee'; if(conf>=2) return 'confirmee'; return 'proposee'; }
     async function realiserVote(id, type, motifTexte){
       const cle='ohd_vote_'+id+'_'+type;
       const deja=!!localStorage.getItem(cle);
@@ -176,91 +221,12 @@
       const upd={confirmations:conf,contestations:cont,statut:calculStatut(conf,cont)};
       if(type==='contest' && !deja && motifTexte) upd.commentaire=motifTexte;
       await api('PATCH','/rest/v1/affirmations?id=eq.'+encodeURIComponent(id), upd);
-      // écrire l'événement dans le fil des échanges
-      if(!deja){
-        await api('POST','/rest/v1/echanges',{affirmation_id:id,type:type,auteur:'Citoyen lambda',contenu: type==='contest' ? motifTexte : null});
-      }
+      if(!deja) await api('POST','/rest/v1/echanges',{affirmation_id:id,type:type,auteur:'Citoyen lambda',contenu: type==='contest' ? motifTexte : null});
       if(deja) localStorage.removeItem(cle); else localStorage.setItem(cle,'1');
-      // recharger l'en-tête et le fil
-      charger();
     }
-
-    function rafraichirBoutons(aff){
-      const btnC=document.getElementById('action-confirm');
-      const btnT=document.getElementById('action-contest');
-      const aC=!!localStorage.getItem('ohd_vote_'+aff.id+'_confirm');
-      const aT=!!localStorage.getItem('ohd_vote_'+aff.id+'_contest');
-      btnC.className='px-4 py-2 rounded-xl text-sm font-bold transition cursor-pointer '+(aC?'bg-emerald-100 text-emerald-700':'bg-emerald-600 text-white hover:bg-emerald-700');
-      btnC.textContent = aC ? '✓ Annuler ma confirmation' : 'Confirmer';
-      btnT.className='px-4 py-2 rounded-xl text-sm font-bold transition cursor-pointer '+(aT?'bg-red-100 text-red-700':'bg-white border border-red-300 text-red-700 hover:bg-red-50');
-      btnT.textContent = aT ? '✗ Annuler ma contestation' : 'Contester';
-    }
-
-    async function chargerRessources(){
-      const zone=document.getElementById('liste-ressources');
-      try{
-        // documents liés via affirmation_documents
-        const lien = await api('GET','/rest/v1/affirmation_documents?select=document_id&affirmation_id=eq.'+encodeURIComponent(affId));
-        if(!lien || !lien.length){ zone.innerHTML='<p class="text-stone-500 text-sm">Aucune ressource liée pour l\'instant.</p>'; return; }
-        const ids = lien.map(l=>l.document_id).join(',');
-        const docs = await api('GET','/rest/v1/documents?select=titre,url,type_document&id=in.('+ids+')');
-        zone.innerHTML='<ul class="space-y-1">'+docs.map(d=>`
-          <li class="text-sm"><a href="${esc(d.url)}" target="_blank" rel="noopener" class="text-emerald-700 hover:underline">• ${esc(d.titre)}</a> <span class="text-stone-400">(${esc(d.type_document||'')})</span></li>`).join('')+'</ul>';
-      }catch(e){ zone.innerHTML='<p class="text-red-600 text-sm">Erreur ressources : '+esc(e.message)+'</p>'; }
-    }
-
-    async function chargerFil(){
-      const zone=document.getElementById('fil');
-      try{
-        const fil = await api('GET','/rest/v1/echanges?affirmation_id=eq.'+encodeURIComponent(affId)+'&order=cree_le.asc');
-        if(!fil || !fil.length){ zone.innerHTML='<p class="text-stone-500 text-sm">Aucun échange pour l\'instant.</p>'; return; }
-        zone.innerHTML=fil.map(e=>{
-          let badge='', couleur='';
-          if(e.type==='confirm'){ badge='✓ confirmation'; couleur='text-emerald-700 bg-emerald-50'; }
-          else if(e.type==='contest'){ badge='✗ contestation'; couleur='text-red-700 bg-red-50'; }
-          else { badge='💬 remarque'; couleur='text-stone-600 bg-stone-100'; }
-          const ident = esc(e.auteur||'Citoyen');
-          return `<div class="border-l-2 border-stone-200 pl-3 py-1">
-            <div class="flex items-center gap-2 text-xs"><span class="${couleur} px-2 py-0.5 rounded-full">${badge}</span><span class="text-stone-400">${ident}</span></div>
-            <p class="text-sm text-stone-700 mt-1">${esc(e.contenu||'')}</p>
-          </div>`;
-        }).join('');
-      }catch(e){ zone.innerHTML='<p class="text-red-600 text-sm">Erreur fil : '+esc(e.message)+'</p>'; }
-    }
-
-    // Lier une ressource documentaire
-    document.getElementById('form-ressource').addEventListener('submit', async (ev)=>{
-      ev.preventDefault();
-      const titre=document.getElementById('res-titre').value.trim();
-      const url=document.getElementById('res-url').value.trim();
-      const msg=document.getElementById('res-msg');
-      if(!titre){ msg.textContent='Titre requis'; return; }
-      try{
-        // créer le document puis le lier
-        const doc=await api('POST','/rest/v1/documents',{titre,url:url||null,type_document:'ressource'});
-        if(doc && doc[0]){
-          await api('POST','/rest/v1/affirmation_documents',{affirmation_id:affId,document_id:doc[0].id});
-        }
-        msg.textContent='✅ Ressource liée !';
-        document.getElementById('res-titre').value='';
-        document.getElementById('res-url').value='';
-        chargerRessources();
-      }catch(e){ msg.textContent='Erreur : '+e.message; }
-    });
-
-    // Ajouter au fil des échanges
-    document.getElementById('btn-comment').addEventListener('click', async ()=>{
-      const contenu=document.getElementById('nv-comment').value.trim();
-      const msg=document.getElementById('res-msg');
-      if(!contenu){ alert('Veuillez écrire une remarque.'); return; }
-      try{
-        await api('POST','/rest/v1/echanges',{affirmation_id:affId,type:'commentaire',auteur:'Citoyen lambda',contenu});
-        document.getElementById('nv-comment').value='';
-        chargerFil();
-      }catch(e){ msg.textContent='Erreur : '+e.message; }
-    });
 
     charger();
+    chargerFil();
   </script>
 </body>
 </html>
