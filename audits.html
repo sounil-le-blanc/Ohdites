@@ -89,6 +89,7 @@
   <script>
     const params = new URLSearchParams(window.location.search);
     const domaine = params.get('domaine');
+    const secteur = params.get('secteur');
     const titreEl = document.getElementById('titre-domaine');
 
     titreEl.textContent = domaine ? 'GÉT ' + (domaine[0].toUpperCase()+domaine.slice(1)) : '🔍 Index Général des Audits Citoyens';
@@ -138,8 +139,16 @@
           // secteurs
           if(secteurs&&secteurs.length){
             h+='<div class="mb-3"><span class="text-xs font-bold uppercase tracking-wider text-stone-500">Secteurs</span><div class="flex flex-wrap gap-2 mt-1">'+
-               secteurs.map(s=>`<a href="audits.html?domaine=${encodeURIComponent(domaine)}&secteur=${s.id}" class="px-3 py-1.5 rounded-full bg-stone-100 text-stone-700 text-xs border border-stone-200 hover:bg-emerald-50 hover:border-emerald-300 transition">${escv(s.nom)}</a>`).join('')+
+               secteurs.map(s=>{
+                 const actif = String(s.id)===String(secteur);
+                 return `<a href="audits.html?domaine=${encodeURIComponent(domaine)}&secteur=${s.id}" class="px-3 py-1.5 rounded-full text-xs transition ${actif?'bg-emerald-600 text-white shadow':'bg-stone-100 text-stone-700 border border-stone-200 hover:bg-emerald-50 hover:border-emerald-300'}">${escv(s.nom)}</a>`;
+               }).join('')+
                '</div></div>';
+          }
+          // si on explore un secteur, l'indiquer + prier d'afficher le sous-contenu
+          if(secteur){
+            const secCible=(secteurs||[]).find(x=>String(x.id)===String(secteur));
+            h+='<div class="mb-3 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800">🔎 Vous explorez le secteur : <strong>'+escv(secCible?secCible.nom:'secteur')+'</strong> — sous-bulle du domaine '+escv(domaine||'')+'. (Le contenu détaillé se construit selon l\'avancée des dossiers.)</div>';
           }
           // sujets (tous, puisqu'ils peuvent traverser les domaines)
           if(sujetsDom&&sujetsDom.length){
