@@ -117,7 +117,7 @@
       try {
         const q = encodeURIComponent('dossier_id')+'=eq.'+encodeURIComponent(dossierId);
         const docs = await get('/rest/v1/documents?select=titre,url,type_document&'+q);
-        const afs  = await get('/rest/v1/affirmations?select=texte,statut,confirmations,contestations,commentaire&'+q);
+        const afs  = await get('/rest/v1/affirmations?select=id,texte,statut,confirmations,contestations,commentaire&'+q);
         let html='';
         if(docs && docs.length){
           html+=`<div class="mt-4"><span class="text-xs font-bold uppercase tracking-wider text-stone-500">📄 Documents sourcés (${docs.length})</span><ul class="mt-2 space-y-1">
@@ -127,7 +127,7 @@
         if(afs && afs.length){
           html+=`<div class="mt-4"><span class="text-xs font-bold uppercase tracking-wider text-stone-500">✔ Affirmations vérifiables (${afs.length})</span><ul class="mt-2 space-y-2">
             ${afs.map(a=>`<li class="border-l-2 ${COUL[a.statut]||'bg-stone-200'} pl-3 py-1">
-              <span class="text-sm text-stone-800">${esc(a.texte)}</span>
+              <a href="affirmation.html?id=${esc(a.id)}" class="text-sm text-stone-800 hover:text-emerald-700 hover:underline">${esc(a.texte)}</a>
               <span class="text-xs ml-2 px-2 py-0.5 rounded-full ${COUL[a.statut]||'bg-stone-200'}">${STATUT[a.statut]||a.statut}</span>
               ${a.confirmations>0?`<span class="text-xs text-emerald-700"> ✓${a.confirmations}</span>`:''}
               ${a.contestations>0?`<span class="text-xs text-red-700"> ✗${a.contestations}</span>`:''}
