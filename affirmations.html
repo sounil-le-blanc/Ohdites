@@ -177,8 +177,12 @@
                   ${a.contestations>0 ? '<span class="text-red-700">✗ '+a.contestations+' contre.</span>' : ''}
                 </div>
                 <div class="mt-2 flex gap-3">
-                  <button class="text-xs text-emerald-700 hover:underline" onclick="voter('${a.id}','confirm')">Confirmer</button>
-                  <button class="text-xs text-red-700 hover:underline" onclick="voter('${a.id}','contest')">Contester</button>
+                  ${localStorage.getItem('ohd_vote_'+a.id+'_confirm') ?
+                    '<button class="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full hover:underline" onclick="voter(\''+a.id+'\',\'confirm\')">✓ Annuler ma confirmation</button>' :
+                    '<button class="text-xs text-emerald-700 hover:underline" onclick="voter(\''+a.id+'\',\'confirm\')">Confirmer</button>'}
+                  ${localStorage.getItem('ohd_vote_'+a.id+'_contest') ?
+                    '<button class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full hover:underline" onclick="voter(\''+a.id+'\',\'contest\')">✗ Annuler ma contestation</button>' :
+                    '<button class="text-xs text-red-700 hover:underline" onclick="voter(\''+a.id+'\',\'contest\')">Contester</button>'}
                 </div>
               </div>`).join('')}
             </div>
@@ -187,29 +191,28 @@
       zone.innerHTML = html;
     }
 
+    // Règle de statut dérivée UNIQUEMENT des compteurs (vote et undo suivent la même règle)
+    function calculStatut(conf, cont){
+      if (cont > 0) return 'contestee';          // une contestation signale un désaccord
+      if (conf >= 2) return 'confirmee';          // 2+ confirmations sans contestation
+      if (conf > 0 || cont > 0) return 'proposee';
+      return 'proposee';
+    }
+
     async function voter(id, type) {
-      // EMPÊCHER le double vote (démo : un seul compte actif) via localStorage
       const cle = 'ohd_vote_' + id + '_' + type;
-      if (localStorage.getItem(cle)) {
-        alert("Vous avez déjà " + (type==='confirm' ? 'confirmé' : 'contesté') + " cette affirmation.");
-        return;
-      }
       try {
         const cur = await api('GET', '/rest/v1/affirmations?select=confirmations,contestations,statut&id=eq.'+encodeURIComponent(id));
-        const base = (cur && cur[0]) ? cur[0] : { confirmations:0, contestations:0, statut:'proposee' };
-        // incrément
-        const upd = { };
-        if (type==='confirm') upd.confirmations = (base.confirmations||0) + 1;
-        else upd.contestations = (base.contestations||0) + 1;
-        // logique de statut (démo)
-        const conf = type==='confirm' ? upd.confirmations : (base.confirmations||0);
-        const cont = type==='contest' ? upd.contestations : (base.contestations||0);
-        if (type==='confirm' && conf >= 2) upd.statut = 'confirmee';
-        else if (type==='contest') {
-          upd.statut = (cont > conf) ? 'contestee' : 'nuanacee';
-        }
+        const base = (cur && cur[0]) ? cur[0] : { confirmations:0, contestations:0, statut:'a_verifier' };
+        const dejaVote = !!localStorage.getItem(cle);
+        // vote ou undo (défaut : annuler si déjà voté)
+        let conf = base.confirmations||0, cont = base.contestations||0;
+        if (type==='confirm') conf = dejaVote ? Math.max(0, conf-1) : conf+1;
+        else cont = dejaVote ? Math.max(0, cont-1) : cont+1;
+        const upd = { confirmations: conf, contestations: cont, statut: calculStatut(conf, cont) };
         await api('PATCH', '/rest/v1/affirmations?id=eq.'+encodeURIComponent(id), upd);
-        localStorage.setItem(cle, '1');
+        // bascule localStorage
+        if (dejaVote) localStorage.removeItem(cle); else localStorage.setItem(cle, '1');
         charger();
       } catch(e){ alert('Erreur : '+e.message); }
     }
