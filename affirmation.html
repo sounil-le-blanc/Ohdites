@@ -198,11 +198,8 @@
     async function retirerCarte(carteId){
       try{
         if(!confirm('Retirer cette carte et tous ses commentaires ?')) return;
-        // supprimer la carte (les commentaires enfants partent en cascade via parent_id FK cascade)
         await api('DELETE','/rest/v1/echanges?id=eq.'+encodeURIComponent(carteId));
-        // nettoyer le DOM immédiatement
-        const ce=document.querySelector('[data-carte="'+carteId+'"]'); if(ce) ce.remove();
-        recalculerCompteurs();
+        await recalculerCompteurs();        // <-- attendre le recalcul (compteurs MAJ en base)
         chargerFil();
       }catch(e){ alert('Erreur : '+e.message); }
     }
@@ -223,9 +220,9 @@
     // ---------- recalculer les compteurs de l'affirmation depuis les cartes ----------
     async function recalculerCompteurs(){
       try{
-        const fil=await api('GET','/rest/v1/echanges?affirmation_id=eq.'+encodeURIComponent(affId)+'&is:null.parent_id&type=in.(confirm,contest)');
-        // filtre simple: les cartes confirm/contest
-        const cartes=(fil||[]).filter(e=>!e.parent_id);
+        // récupérer tous les échanges puis filtrer les cartes en JS (fiable)
+        const tudo=await api('GET','/rest/v1/echanges?affirmation_id=eq.'+encodeURIComponent(affId));
+        const cartes=(tudo||[]).filter(e=>!e.parent_id && (e.type==='confirm'||e.type==='contest'));
         const confirms=cartes.filter(e=>e.type==='confirm').length;
         const contests=cartes.filter(e=>e.type==='contest').length;
         // calculer le statut
@@ -267,7 +264,7 @@
       document.getElementById('carte-arg').value='';
       document.getElementById('carte-source').value='';
       document.getElementById('editeur-carte').classList.add('hidden');
-      recalculerCompteurs();
+      await recalculerCompteurs();
       chargerFil();
     }
     document.getElementById('btn-poster-carte').addEventListener('click',posterCarte);
