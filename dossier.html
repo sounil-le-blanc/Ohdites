@@ -69,8 +69,16 @@
 
     async function chargerDossiers(){
       const zone=document.getElementById('liste-dossiers');
+      const params=new URLSearchParams(window.location.search);
+      const cibleId=params.get('d');
       try {
-        const data = await get('/rest/v1/dossiers?select=id,titre,resume');
+        let data;
+        if(cibleId){
+          const r=await get('/rest/v1/dossiers?select=id,titre,resume&id=eq.'+encodeURIComponent(cibleId));
+          data=r;
+        } else {
+          data = await get('/rest/v1/dossiers?select=id,titre,resume');
+        }
         if(!data || !data.length){ zone.innerHTML='<div class="bg-white rounded-2xl border p-6 text-stone-500 text-sm">Aucun dossier pour l\'instant.</div>'; return; }
         zone.innerHTML='';
         for(const d of data){
@@ -82,6 +90,7 @@
               <span class="text-xs px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 shrink-0">en cours</span>
             </div>
             <p class="text-stone-600 text-sm mt-2">${esc(d.resume||'')}</p>
+            ${cibleId?'':'<a href="dossier.html?d='+esc(d.id)+'" class="inline-block mt-2 text-xs text-emerald-700 hover:underline">Ouvrir ce dossier →</a>'}
             <div id="detail-${d.id}" class="mt-4"><p class="text-stone-400 text-sm">Chargement…</p></div>`;
           zone.appendChild(cart);
           remplirDetail(d.id);

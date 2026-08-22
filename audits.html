@@ -49,6 +49,8 @@
 
     <!-- CONTENU D'AUDIT RÉEL — piloté par le JS selon le domaine -->
     <div id="contenu-audit" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+    <!-- Contenu riche du domaine : dossiers + affirmations classées par statut -->
+    <div id="contenu-domaine" class="flex flex-col gap-6 mt-2"></div>
     <div id="point-entree" class="hidden"></div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -188,6 +190,71 @@
     });
     conteneur.innerHTML = html;
     conteneur.classList.remove('hidden');
+
+    // ---- Contenu riche du domaine : dossiers + affirmations classées par statut ----
+    if (domaine) {
+      const API = 'https://trchckgeemvqlgbcrntz.supabase.co';
+      const KEY = 'sb_publishable_fAefpcpQfoolCPlQwBzxlg_0M9-jfRV';
+      const STATUT = {
+        'proposee':'proposée','a_verifier':'à vérifier','confirmee':'confirmée',
+        'contestee':'contestée','nuanacee':'nuancée','refutee':'réfutée','impossible':'impossible à vérifier'
+      };
+      const COUL = {
+        'proposee':'bg-stone-200 text-stone-700','a_verifier':'bg-yellow-100 text-yellow-800',
+        'confirmee':'bg-emerald-100 text-emerald-800','contestee':'bg-orange-100 text-orange-800',
+        'nuanacee':'bg-blue-100 text-blue-800','refutee':'bg-red-100 text-red-800','impossible':'bg-stone-100 text-stone-500'
+      };
+      async function get(path){
+        const r=await fetch(API+path,{headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Accept':'application/json'}});
+        if(!r.ok) throw new Error('HTTP '+r.status); return r.json();
+      }
+      function escv(t){ const d=document.createElement('div'); d.textContent=(t==null?'':String(t)); return d.innerHTML; }
+      (async function(){
+        const zone=document.getElementById('contenu-domaine');
+        try {
+          // domaine_id via slug
+          const doms=await get('/rest/v1/domaines?select=id&slug=eq.'+encodeURIComponent(domaine));
+          if(!doms||!doms.length){ zone.innerHTML=''; return; }
+          const did=doms[0].id;
+          // dossiers du domaine
+          const dossiers=await get('/rest/v1/dossiers?select=id,titre,resume&domaine_id=eq.'+did);
+          // affirmations du domaine (remonte via dossier)
+          const affs=await get('/rest/v1/affirmations?select=texte,statut,confirmations,contestations,commentaire,dossier_id&dossier_id=in.('+(dossiers.map(d=>d.id).join(',')||'00000000-0000-0000-0000-000000000000')+')');
+          let h='';
+
+          // Bloc : dossiers du domaine
+          if(dossiers&&dossiers.length){
+            h+='<div class="bg-white rounded-2xl border border-stone-200/60 shadow-sm p-6">'+
+               '<h3 class="font-bold text-stone-900 mb-3">📁 Dossiers d\'enquête du domaine</h3>'+
+               dossiers.map(d=>`<div class="border-b border-stone-100 py-2"><a href="dossier.html?d=${d.id}" class="text-emerald-700 font-semibold hover:underline">${escv(d.titre)}</a><div class="text-xs text-stone-500">${escv((d.resume||'').slice(0,140))}</div></div>`).join('')+
+               '</div>';
+          } else {
+            h+='<div class="bg-white rounded-2xl border p-6 text-stone-500 text-sm">Aucun dossier créé pour ce domaine pour l\'instant. Proposez-en un, ou une source.</div>';
+          }
+
+          // Bloc : affirmations classées par statut
+          if(affs&&affs.length){
+            const groupes={};
+            affs.forEach(a=>{ (groupes[a.statut||'proposee']=groupes[a.statut||'proposee']||[]).push(a); });
+            const ordre=['a_verifier','proposee','confirmee','contestee','nuanacee','refutee','impossible'];
+            h+='<div class="bg-white rounded-2xl border border-stone-200/60 shadow-sm p-6">'+
+               '<h3 class="font-bold text-stone-900 mb-3">✔ Affirmations vérifiables — classées par statut</h3>';
+            ordre.forEach(st=>{
+              const liste=groupes[st]; if(!liste||!liste.length) return;
+              h+=`<div class="mt-3 mb-1 text-xs font-bold uppercase tracking-wider">${STATUT[st]||st} (${liste.length})</div>`+
+                 liste.map(a=>`<div class="ml-2 border-l-2 ${COUL[st]||'bg-stone-200'} pl-3 py-1 border-stone-200"><span class="text-sm text-stone-800">${escv(a.texte)}</span>`+
+                 (a.confirmations>0?`<span class="text-xs text-emerald-700"> ✓${a.confirmations}</span>`:'' )+
+                 (a.contestations>0?`<span class="text-xs text-red-700"> ✗${a.contestations}</span>`:'')+
+                 `</div>`).join('');
+            });
+            h+='</div>';
+          } else {
+            h+='<div class="bg-white rounded-2xl border p-6 text-stone-500 text-sm">Aucune affirmation vérifiable pour ce domaine pour l\'instant.</div>';
+          }
+          zone.innerHTML=h;
+        } catch(e){ zone.innerHTML='<div class="bg-red-50 border p-6 text-sm text-red-700">Erreur de chargement du domaine : '+escv(e.message)+'</div>'; }
+      })();
+    }
 
     point.innerHTML = !domaine
       ? // === ÉTAT INDEX GÉNÉRALE : didactique, on guide le choix ===
