@@ -38,3 +38,9 @@
 - Vérifier chaque insert/lecture réellement (pas seulement écrire du code).
 - Consigner les avancées. Corriger ses erreurs sans dramatiser.
 - Se caler STRICTEMENT sur le PDF (le serveur de mission, c'est Anne-Laure).
+
+## Décision (2026-08-22) : Authentification
+- Nécessaire plus tard (Brique E) pour modération/publication/rôles.
+- DECISION : on ne fait PAS l'auth maintenant, et PAS d'auth fictive.
+- Le dépôt reste ouvert (RLS insert public) pour tester sans friction.
+- Supabase Auth permettra plus tard : rôles, RLS, modération.
