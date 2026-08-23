@@ -37,6 +37,11 @@
 
   <main class="w-full max-w-4xl mx-auto px-6 py-12 flex-grow flex flex-col gap-10">
 
+    <!-- INDICATEUR DE PARCOURS (p.5) -->
+    <div id="bandeau-parcours" class="bg-emerald-50 border border-emerald-200 rounded-2xl px-5 py-3 text-sm">
+      <span class="font-bold text-stone-800">Parcours :</span> <span id="parcours-texte">étape 1 – Je m'intéresse : choisissez un domaine.</span>
+    </div>
+
     <div class="bg-white border border-stone-200/60 rounded-3xl p-8 shadow-sm text-center">
       <span
         class="bg-emerald-100 text-emerald-800 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full">Pôle
@@ -90,6 +95,13 @@
     const params = new URLSearchParams(window.location.search);
     const domaine = params.get('domaine');
     const secteur = params.get('secteur');
+    // Bandeau de parcours (p.5) : indicateur d'étape
+    const pTxt=document.getElementById('parcours-texte');
+    if(pTxt){
+      if(!domaine) pTxt.textContent='étape 1 – Je m\'intéresse : choisissez un domaine dans la couronne (accueil).';
+      else if(secteur) pTxt.textContent='étape 2-3 – J\'explore : vous êtes dans la sous-bulle (secteur) du domaine « '+domaine+' ».';
+      else pTxt.textContent='étape 2 – J\'explore : domaine « '+domaine+' ». Découvrez ses secteurs, sujets, GÉT et dossiers.';
+    }
     const titreEl = document.getElementById('titre-domaine');
 
     titreEl.textContent = domaine ? 'GÉT ' + (domaine[0].toUpperCase()+domaine.slice(1)) : '🔍 Index Général des Audits Citoyens';
