@@ -125,7 +125,7 @@
     async function charger() {
       const zone = document.getElementById('liste-affirm');
       try {
-        const data = await api('GET', '/rest/v1/affirmations?select=*,sujets(nom)&order=cree_le.desc&limit=500');
+        const data = await api('GET', '/rest/v1/affirmations?select=*,sujets(nom),documents!affirmations_document_id_fkey(id,titre,url)&order=cree_le.desc&limit=500');
         ToutesAff = data || [];
         // charger la liste des thèmes
         const suj = await api('GET', '/rest/v1/sujets?select=id,nom&order=nom');
@@ -184,6 +184,11 @@
                   ${a.confirmations>0 ? '<span class="text-emerald-700">✓ '+a.confirmations+' confirm.</span>' : ''}
                   ${a.contestations>0 ? '<span class="text-red-700">✗ '+a.contestations+' contre.</span>' : ''}
                 </div>
+                ${(function(){
+                  const doc = a.documents ? (Array.isArray(a.documents)?a.documents[0]:a.documents) : null;
+                  if(!doc || !doc.id) return '';
+                  return '<div class="mt-2 pt-2 border-t border-stone-100 text-xs text-stone-500">📄 Source : <a href="document.html?id='+esc(doc.id)+'" class="text-emerald-700 hover:underline">'+esc(doc.titre||'voir le document')+'</a></div>';
+                })()}
               </div>`).join('')}
             </div>
           </div>`;
