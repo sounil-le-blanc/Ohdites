@@ -191,7 +191,7 @@
         if(!links||!links.length){ z.innerHTML='<span class="text-stone-400 text-xs">Aucune entité citée pour l\'instant.</span>'; return; }
         z.innerHTML=links.map(l=>{
           const e=(l.entites&&l.entites[0])?l.entites[0]:l.entites;
-          const nom=e&&e.nom?e.nom:'?', typ=e&&e.type?e.type:'?';
+          const nom=e&&e.nom?e.nom:'?', typ=(e&&e.type_entite)?e.type_entite:(e&&e.type)||'?';
           const ic={personne:'👤',organisation:'🏢',institution:'🏛',lieu:'📍'}[typ]||'🏷';
           return `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-stone-100 border border-stone-200">${ic} ${esc(nom)} <span class="text-stone-400 text-[10px]">${esc(typ)}</span></span>`;
         }).join('');
@@ -211,7 +211,7 @@
         const found=await get('/rest/v1/entites?select=id,nom&nom=ilike.'+encodeURIComponent(nom)+'&limit=1');
         let ent=found&&found[0]?found[0]:null;
         if(!ent){
-          const r=await fetch(API+'/rest/v1/entites',{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Accept':'application/json','Prefer':'return=representation'},body:JSON.stringify({nom,type:typ})});
+          const r=await fetch(API+'/rest/v1/entites',{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Accept':'application/json','Prefer':'return=representation'},body:JSON.stringify({nom,type_entite:typ})});
           if(!r.ok){ let m='HTTP '+r.status; try{const j=await r.json();m=j.message||m;}catch(e){} throw new Error(m); }
           const j=await r.json(); ent=j&&j[0]||{id:null};
         }
