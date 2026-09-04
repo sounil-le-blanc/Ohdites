@@ -1,46 +1,51 @@
 # 📋 Cahier des charges — Oh Dites ! (PDF d'Anne-Laure)
-> Document de travail — carte de conformité au PDF de référence (présentation du site).
-> Serveur de mission : nous construisons pour Anne-Laure, fidèle à sa vision.
+> Document de travail — carte de conformité au PDF de référence.
+> ⚠️ MIS À JOUR le 2026-09-04 après une longue session d'implémentation : l'état réel est en grandes cases cochées. Ce n'est pas un plan idéal, c'est le fait accompli vérifié en live.
 
-## Rappel de la vision (PDF)
-- Audits citoyens factuels, 0% parti pris, croisés et sourcés.
-- Navigation par bulles en 4 pages : Accueil → Domaine → Dossier → Document.
-- Structure en GRAPHE (une info = plusieurs bulles).
-- Le cœur : affirmations documentées avec STATUTS (jamais juste vrai/faux).
+## Vision (PDF)
+- Audits citoyens factuels, 0 % parti pris, croisés et sourcés ✅ porté par le modèle (docs + affirmations + statuts + discussion).
+- Navigation par bulles en 4 pages : Accueil → Domaine → Dossier → Document ✅ (en pratique : index → audits?domaine → dossier.html?d → document.html?id ; + page rapport).
+- Structure en GRAPHE (une info = plusieurs bulles) ✅ embryonnaire mais réelle (secteurs / sujets / entités liées aux documents).
+- Cœur : affirmations à STATUTS, jamais simple vrai/faux ✅ (7 statuts, discussion confirm/contest, statut dérivé).
 
-## État du site actuel
-- ✅ Accueil avec 9 bulles de domaines cliquables
-- ✅ Chartes/valeurs, esprit
-- ✅ Formulaire "proposer une source" (branche Supabase table `sources`)
-- 🔴 Manque : Dossier, Document, Secteurs/Sujets, Entités, GÉT, Affirmations+statuts, Rôles
+## État du site (réel, vérifié 2026-09-04)
+- ✅ Accueil 9 bulles (dont bulle Vivant réparée → ?domaine=vivant).
+- ✅ Domaines avec « faits & chiffres clés » (PDF p.2) + secteurs/sous-bulles + sujets transversaux.
+- ✅ Dossier : résumé, docs sourcés, affirmations, questions ouvertes, lien rapport.
+- ✅ Document : fiche + rigueur (source, date consultation, empreinte) + affirmations par statut + entités citées (pdf p.7/9).
+- ✅ Rapport d'audit imprimable : toutes docs + affirmations + chronologie (p.3).
+- ✅ Affirmations avec source liée / obligatoire (flux nettoyé : plus d'orpheline volontaire) et page par statut.
+- ✅ GÉT : création, fiche (responsable/secrétaire désignables), fiche-projet, comptes-rendus.
+- ✅ Rejoindre / proposer un sujet / soutenir (formule Brique F).
+- ✅ Chartes/valeurs (statique).
 
-## Feuille de route (briques, ordre logique)
-### Brique A — Fondation données (schéma graphe)
-- [ ] Tables : domaines, secteurs, sujets, dossiers, documents, entites, documents_entites
-### Brique B — Le cœur (AFFIRMATIONS)
-- [ ] Table affirmations (source, auteur, statut, confirmations/contestations)
-- [ ] Statuts : proposee / a_verifier / confirmee / contestee / nuancee / refutee / impossible
-- [ ] Page qui affiche les affirmations par statut (au moins par domaine)
-### Brique C — Pages de navigation
-- [ ] Page Domaine (sous-bulles secteurs/sujets)
-- [ ] Page Dossier (résumé, chronologie, documents, affirmations, questions)
-- [ ] Page Document (fiche + affirmations par statut)
+## Feuille de route (re-lecture à l'aune de ce qui est fait)
+### Brique A — données/graphe
+- [x] domaines, secteurs, sujets, dossiers, documents
+- [x] entites + document_entites (ajoutées, UI « entités citées »)
+- [ ] « une affirm. → plusieurs docs » éventuelle table de liaison affirmation_documents (à check).
+### Brique B — affirmations
+- [x] table affirmations (source/auteur/confirm/contest) ; statuts dérivés
+- [x] page affirmations par statut (+ par domaine/filtre)
+### Brique C — pages navigation
+- [x] Domaine (chiffres clés + sous-bulles) ; Dossier ; Document ; + Rapport
+- [x] questions ouvertes d'un dossier
 ### Brique D — GÉT
-- [ ] Table GET + Fiche GET (responsable, secrétaire, CR)
-- [ ] Bouton "lancer une fiche GÉT" réel (au lieu du simple message)
-### Brique E — Rôles & modération
-- [ ] Auth (affichage rôles visiteur/inscrit/vérif/éditeur) + RLS
-### Brique F — Rejoindre
-- [ ] Formulaire "proposer un sujet" / adhérer / soutenir
+- [x] fiche GÉT + dossier de travail + rôles + fiche-projet + CR
+- [ ] « lancer une fiche GÉT » (workflow fait via création GÉT + dossier) — à formaliser en un vrai bouton/parcours « lancer ».
+### Brique E — auth / rôles / RLS
+- [ ] NON fait (décision 22-08 : pas d'auth fictive). Dépôt public assumé pour tester. RLS sur documents durcie post-migration.
+### Brique F — rejoindre
+- [x] proposer un sujet / rejoindre / soutenir (table messages)
 
-## Principe de travail
-- Brique par brique, la plus précise possible (ni sous-, ni sur-construite).
-- Vérifier chaque insert/lecture réellement (pas seulement écrire du code).
-- Consigner les avancées. Corriger ses erreurs sans dramatiser.
-- Se caler STRICTEMENT sur le PDF (le serveur de mission, c'est Anne-Laure).
+## Prochaines pistes (liste libre, non planifiée)
+- Formaliser un vrai « workflow GÉT » (fiche-projet → CR → synthèse) en bouton dédié.
+- Modérer (Brique E) ; publier/dépublier.
+- Donner plus de matière à d'autres domaines que le mix électrique/nutrition.
+- Vérifier la boucle « une affirmation = plusieurs documents » (association vs document_entites).
 
-## Décision (2026-08-22) : Authentification
-- Nécessaire plus tard (Brique E) pour modération/publication/rôles.
-- DECISION : on ne fait PAS l'auth maintenant, et PAS d'auth fictive.
-- Le dépôt reste ouvert (RLS insert public) pour tester sans friction.
-- Supabase Auth permettra plus tard : rôles, RLS, modération.
+## Note de méthode
+- Chaque brique livrée cette session a été : poussée (git main) → déployée Vercel → vérifiée en live (browser) → souvent nettoyée des traces de test.
+- Certaines cases listées « à check » = pas encore rigoureusement testées de bout en bout.
+
+> Serveur de mission : Anne-Laure. Si une case cochée ici n'est pas conforme à TA vision, signale-le : on ajuste.
