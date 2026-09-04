@@ -69,6 +69,15 @@
       </div>
     </div>
 
+    <!-- Lien vers le RAPPORT COMPLET (vue rapport/impression) -->
+    <div id="rapport-link" class="hidden bg-emerald-600 text-white rounded-2xl px-5 py-3 mb-6 items-center justify-between gap-3">
+      <div>
+        <div class="font-bold">📄 Rapport complet du dossier</div>
+        <div class="text-xs text-white/80">Tous les documents &amp; les affirmations classées, sur une seule page.</div>
+      </div>
+      <a id="open-rapport" href="#" class="bg-white text-emerald-700 font-bold text-sm px-4 py-2 rounded-xl shrink-0 hover:bg-emerald-50 transition no-underline">Voir le rapport →</a>
+    </div>
+
     <h2 class="text-lg font-bold text-stone-900 mb-3">Dossiers disponibles</h2>
     <div id="liste-dossiers" class="flex flex-col gap-4 mb-8">Chargement des dossiers…</div>
   </main>
@@ -173,6 +182,10 @@
     if(propBlock){ if(dossierCourant){ propBlock.classList.remove('hidden'); } else { propBlock.classList.add('hidden'); } }
     const docBlock=document.getElementById('doc-block');
     if(docBlock){ if(dossierCourant){ docBlock.classList.remove('hidden'); } else { docBlock.classList.add('hidden'); } }
+    // Lien "rapport complet" visible quand un dossier précis est ouvert
+    const rl=document.getElementById('rapport-link');
+    const ol=document.getElementById('open-rapport');
+    if(rl&&ol){ if(dossierCourant){ rl.classList.remove('hidden'); rl.classList.add('flex'); ol.href='rapport.html?id='+encodeURIComponent(dossierCourant); } else { rl.classList.add('hidden'); } }
     document.getElementById('btn-affirmer').addEventListener('click', async ()=>{
       const texte=document.getElementById('aff-texte').value.trim();
       const src=document.getElementById('aff-source').value.trim();
