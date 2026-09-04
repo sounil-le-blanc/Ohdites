@@ -116,12 +116,14 @@
       const box=document.getElementById('detail-'+dossierId);
       try {
         const q = encodeURIComponent('dossier_id')+'=eq.'+encodeURIComponent(dossierId);
-        const docs = await get('/rest/v1/documents?select=titre,url,type_document&'+q);
+        const docs = await get('/rest/v1/documents?select=id,titre,url,type_document&'+q);
         const afs  = await get('/rest/v1/affirmations?select=id,texte,statut,confirmations,contestations,commentaire&'+q);
         let html='';
         if(docs && docs.length){
           html+=`<div class="mt-4"><span class="text-xs font-bold uppercase tracking-wider text-stone-500">📄 Documents sourcés (${docs.length})</span><ul class="mt-2 space-y-1">
-            ${docs.map(x=>{const u=x.url?`href="${esc(x.url)}" target="_blank" rel="noopener"`:'';return `<li class="text-sm"><a ${u} class="${u?'text-emerald-700 hover:underline':'text-stone-600'}">• ${esc(x.titre)}</a> <span class="text-stone-400">(${esc(x.type_document||'')})</span></li>`;}).join('')}
+            ${docs.map(x=>{const urlLi=x.url?`<a href="${esc(x.url)}" target="_blank" rel="noopener" class="text-stone-400 hover:text-emerald-700 hover:underline" title="Ouvrir la source">↗</a>`:'';return `<li class="text-sm flex items-center gap-2 flex-wrap">
+              <a href="document.html?id=${esc(x.id)}" class="${x.url?'text-emerald-700':'text-stone-700'} hover:underline">• ${esc(x.titre)}</a>
+              <span class="text-stone-400">(${esc(x.type_document||'')})</span> ${urlLi}</li>`;}).join('')}
           </ul></div>`;
         }
         if(afs && afs.length){
