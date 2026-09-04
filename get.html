@@ -36,7 +36,7 @@
     </div>
 
     <!-- Créer un dossier de travail dans ce GÉT -->
-    <div class="mt-6 bg-white rounded-2xl border border-stone-200/60 p-6">
+    <div id="bloc-creer-dossier" class="mt-6 bg-white rounded-2xl border border-stone-200/60 p-6">
       <h3 class="font-bold text-stone-900 mb-3">📁 Créer un dossier de travail</h3>
       <div class="flex flex-col gap-2">
         <input id="nvo-dossier-titre" type="text" placeholder="Titre du dossier (ex: Le vrai coût de l'électricité)" class="bg-stone-50 text-sm px-4 py-3 rounded-xl border border-stone-200 placeholder-stone-400" required>
@@ -76,6 +76,10 @@
     const params = new URLSearchParams(window.location.search);
     const get_id = params.get('id');
     let getDomaineId = null; // domaine du GÉT — hérité par les nouveaux dossiers
+
+    // Sans ?id (ou GET introuvable) : la création de dossier n'a pas de sens
+    // (elle produirait un dossier sans GÉT ni domaine). On masque le bloc.
+    if (!get_id) { const bc = document.getElementById('bloc-creer-dossier'); if (bc) bc.classList.add('hidden'); }
 
     function esc(t){ const d=document.createElement('div'); d.textContent=(t==null?'':String(t)); return d.innerHTML; }
     async function api(method, path, body){
