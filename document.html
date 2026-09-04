@@ -187,7 +187,7 @@
       _docNeuf=documentId;
       const z=document.getElementById('entites-list'); if(!z) return;
       try{
-        const links=await get('/rest/v1/document_entites?select=*,entites(nom,type)&document_id=eq.'+encodeURIComponent(documentId))||[];
+        const links=await get('/rest/v1/document_entites?select=*,entites(nom,type_entite)&document_id=eq.'+encodeURIComponent(documentId))||[];
         if(!links||!links.length){ z.innerHTML='<span class="text-stone-400 text-xs">Aucune entité citée pour l\'instant.</span>'; return; }
         z.innerHTML=links.map(l=>{
           const e=(l.entites&&l.entites[0])?l.entites[0]:l.entites;
