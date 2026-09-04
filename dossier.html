@@ -160,10 +160,26 @@
       const msg=document.getElementById('aff-msg');
       if(!texte){ msg.textContent='Le texte est requis.'; return; }
       if(!dossierCourant){ msg.textContent='Ouvert depuis un dossier de travail pour proposer une affirmation.'; return; }
+      if(!src){ msg.textContent='🔗 Source requise : une affirmation factuelle doit être sourcée (URL du document, rapport, article…).'; return; }
       msg.textContent='Envoi…';
       try{
-        await post('/rest/v1/affirmations',{texte,dossier_id:dossierCourant,auteur_ajout:'Citoyen lambda'});
-        msg.textContent='✅ Affirmation déposée dans ce dossier.';
+        // Rattacher (ou créer) le document-source, puis créer l'affirmation liée
+        let documentId=null;
+        const exist=await get('/rest/v1/documents?select=id&url=eq.'+encodeURIComponent(src)+'&limit=1');
+        if(exist&&exist.length){ documentId=exist[0].id; }
+        else {
+          // POST avec return=representation pour récupérer l'id du doc créé
+          const titre=(texte.slice(0,60)||'Source');
+          const rf=await fetch(API+'/rest/v1/documents',{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Accept':'application/json','Prefer':'return=representation'},body:JSON.stringify({titre:titre+(titre.length>=60?'…':''),url:src,type_document:'source'})});
+          if(rf.ok){ try{ const d=await rf.json(); if(d&&d[0]) documentId=d[0].id; }catch(e){} }
+          if(!documentId){ // secours : re-recherche par URL
+            const f2=await get('/rest/v1/documents?select=id&url=eq.'+encodeURIComponent(src)+'&limit=1');
+            if(f2&&f2.length) documentId=f2[0].id;
+          }
+        }
+        if(!documentId){ msg.textContent='Erreur : document source introuvable.'; return; }
+        await post('/rest/v1/affirmations',{texte,dossier_id:dossierCourant,auteur_ajout:'Citoyen lambda',document_id:documentId});
+        msg.textContent='✅ Affirmation déposée dans ce dossier, liée à sa source.';
         document.getElementById('aff-texte').value=''; document.getElementById('aff-source').value='';
         chargerDossiers();
         if(typeof remplirDetail==='function') remplirDetail(dossierCourant);

@@ -207,10 +207,22 @@
       const dosId = document.getElementById('aff-dossier').value;
       if (!texte) { msg.textContent='Le texte est requis'; return; }
       if (!domId) { msg.textContent='⚠️ Une affirmation doit être rattachée à un domaine.'; return; }
+      if (!url) { msg.textContent='🔗 Source requise : une affirmation factuelle doit être sourcée (collez l’URL d’un document — rapport, article, donnée officielle).'; return; }
       msg.textContent = 'Envoi…';
       try {
-        await api('POST', '/rest/v1/affirmations', { texte, auteur_ajout: 'Citoyen lambda', dossier_id: dosId || null });
-        msg.textContent = '✅ Affirmation déposée (statut : proposée)';
+        // 1) Rattacher (ou créer) le DOCUMENT source — jamais jeter l'URL saisie
+        let documentId = null;
+        const exist = await api('GET', '/rest/v1/documents?select=id&url=eq.'+encodeURIComponent(url)+'&limit=1');
+        if (exist && exist.length) documentId = exist[0].id;
+        else {
+          const titre = texte.slice(0, 60) || 'Source';
+          const doc = await api('POST', '/rest/v1/documents', { titre: titre+(titre.length>=60?'…':''), url, type_document: 'source', resume: 'Source rattachée lors de la proposition de l’affirmation : « '+texte.slice(0,160)+'».' });
+          if (doc && doc.length) documentId = doc[0].id;
+        }
+        if (!documentId) { msg.textContent='Erreur : impossible de créer/retrouver le document source. Réessaie.'; return; }
+        // 2) Créer l'affirmation LIÉE à ce document source
+        await api('POST', '/rest/v1/affirmations', { texte, auteur_ajout: 'Citoyen lambda', dossier_id: dosId || null, document_id: documentId });
+        msg.textContent = '✅ Affirmation déposée, liée à sa source (statut : proposée).';
         document.getElementById('aff-texte').value='';
         document.getElementById('aff-source').value='';
         document.getElementById('aff-dossier').value='';
