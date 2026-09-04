@@ -197,6 +197,27 @@
       Les audits des citoyens lambda
     </p>
 
+    <!-- Rejoindre / proposer un sujet (PDF p.14 + Brique F) -->
+    <section id="rejoindre-form" class="w-full max-w-3xl mx-auto mt-8 bg-white rounded-3xl border border-stone-200/70 shadow-sm p-6 sm:p-8">
+      <h2 class="text-xl font-black text-stone-900 mb-1">🤝 Proposer un sujet / Nous rejoindre</h2>
+      <p class="text-sm text-stone-500 mb-4">Un doute, une info à vérifier, l'envie de porter le projet ? Déposez une ligne : nous sommes en mode "tout ouvert" — rien n'est perdu, tout est consigné.</p>
+      <div class="grid grid-cols-3 gap-2 mb-4 text-xs">
+        <label class="flex items-center gap-1.5 cursor-pointer"><input type="radio" name="fm-type" value="sujet" checked class="accent-emerald-600"> 💡 Proposer un sujet</label>
+        <label class="flex items-center gap-1.5 cursor-pointer"><input type="radio" name="fm-type" value="rejoindre" class="accent-emerald-600"> 🤝 Rejoindre</label>
+        <label class="flex items-center gap-1.5 cursor-pointer"><input type="radio" name="fm-type" value="soutenir" class="accent-emerald-600"> 🔥 Soutenir</label>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-3">
+        <input id="fm-nom" type="text" placeholder="Votre prénom / pseudo" class="flex-1 bg-stone-50 text-sm px-4 py-2.5 rounded-xl border border-stone-200 placeholder-stone-400">
+        <input id="fm-contact" type="email" placeholder="Email (ou autre contact)" class="flex-1 bg-stone-50 text-sm px-4 py-2.5 rounded-xl border border-stone-200 placeholder-stone-400">
+      </div>
+      <input id="fm-sujet" type="text" placeholder="Le sujet / la demande (court)" class="mt-3 w-full bg-stone-50 text-sm px-4 py-2.5 rounded-xl border border-stone-200 placeholder-stone-400">
+      <textarea id="fm-msg" rows="2" placeholder="Plus de détails (optionnel)…" class="mt-3 w-full bg-stone-50 text-sm px-4 py-2.5 rounded-xl border border-stone-200 placeholder-stone-400"></textarea>
+      <div class="mt-3 flex items-center justify-between flex-wrap gap-2">
+        <span id="fm-msg-ok" class="text-sm text-emerald-700"></span>
+        <button id="fm-send" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold px-6 py-2.5 rounded-xl transition cursor-pointer">Envoyer</button>
+      </div>
+    </section>
+
   </main>
 
   <!-- FOOTER -->
@@ -207,6 +228,31 @@
       Licence d'usage perpétuelle & gratuite accordée à l'Association • Projet adossé à la F.U.N.
     </div>
   </footer>
+
+  <script>
+    (function(){
+      const API='https://trchckgeemvqlgbcrntz.supabase.co', KEY='sb_publishable_fAefpcpQfoolCPlQwBzxlg_0M9-jfRV';
+      const btn=document.getElementById('fm-send'), okSpan=document.getElementById('fm-msg-ok');
+      if(!btn) return;
+      const radio = ()=> (document.querySelector('input[name="fm-type"]:checked')||{value:'sujet'}).value;
+      btn.addEventListener('click', async ()=>{
+        const nom=document.getElementById('fm-nom').value.trim();
+        const contact=document.getElementById('fm-contact').value.trim();
+        const sujet=document.getElementById('fm-sujet').value.trim();
+        const msg=document.getElementById('fm-msg').value.trim();
+        if(!sujet && !msg){ okSpan.textContent='Dites-nous ce que vous voulez proposer (sujet ou message).'; return; }
+        okSpan.textContent='Envoi…';
+        try{
+          const r=await fetch(API+'/rest/v1/messages',{method:'POST',
+            headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'},
+            body:JSON.stringify({type:radio(),nom:nom||null,contact:contact||null,sujet:sujet||null,message:msg||null})});
+          if(!r.ok){ let e='HTTP '+r.status; try{const j=await r.json();e=j.message||e;}catch(_){} throw new Error(e); }
+          okSpan.textContent='✅ Merci ! Votre proposition est consignée.';
+          ['fm-nom','fm-contact','fm-sujet','fm-msg'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
+        }catch(e){ okSpan.textContent='Erreur : '+e.message; }
+      });
+    })();
+  </script>
 
 </body>
 
