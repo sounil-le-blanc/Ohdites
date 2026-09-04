@@ -1,0 +1,7 @@
+# Captures / notes locales faites pendant les sessions d'amélioration.
+# Ne jamais les pousser sur GitHub (PNG volumineux, données d'écran).
+docs/
+*.png
+*.PNG
+*.DS_Store
+.DS_Store
