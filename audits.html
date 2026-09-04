@@ -56,7 +56,8 @@
     <div id="contenu-domaine" class="flex flex-col gap-6 mt-2"></div>
     <div id="point-entree" class="hidden"></div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Les 3 piliers de la méthode : utiles sur l'index, cachés quand on est DANS un domaine -->
+    <div id="z-methode" class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
       <div class="bg-white p-6 rounded-2xl border border-stone-200/60 shadow-sm flex flex-col gap-2">
         <div class="text-xl">📁</div>
@@ -104,7 +105,13 @@
     }
     const titreEl = document.getElementById('titre-domaine');
 
-    titreEl.textContent = domaine ? 'GÉT ' + (domaine[0].toUpperCase()+domaine.slice(1)) : '🔍 Index Général des Audits Citoyens';
+    // Quand on est DANS un domaine, on range la page : on cache les 3 piliers
+    // de méthode (inutiles ici) pour ne garder que le contenu propre du domaine.
+    const zm=document.getElementById('z-methode');
+    if(zm && domaine) zm.classList.add('hidden');
+    titreEl.textContent = domaine
+      ? '🔎 Le domaine « '+(domaine[0].toUpperCase()+domaine.slice(1))+' » : ce qu\'on en sait factuellement'
+      : '🔍 Index Général des Audits Citoyens';
 
     const point = document.getElementById('point-entree');
     point.classList.remove('hidden');
