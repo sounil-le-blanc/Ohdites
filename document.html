@@ -48,6 +48,26 @@
 
         <p id="d-resume" class="mt-4 text-stone-700 text-sm leading-relaxed"></p>
       </div>
+
+      <!-- Entités citées (PDF p.7/p.9 : une même entité peut apparaître dans plusieurs bulles) -->
+      <div class="mt-3 bg-white rounded-2xl border border-stone-200/70 p-4">
+        <div class="flex items-center justify-between gap-2">
+          <h3 class="text-sm font-bold text-stone-800">🏷 Entités citées</h3>
+          <button id="toggle-entite" class="text-xs text-emerald-700 font-semibold hover:underline cursor-pointer bg-transparent">+ Ajouter</button>
+        </div>
+        <div id="entites-list" class="mt-2 flex flex-wrap gap-2 text-xs"><span class="text-stone-400">…</span></div>
+        <div id="entite-form" class="hidden mt-3 flex gap-2 flex-wrap">
+          <input id="en-nom" type="text" placeholder="Nom (personne, organisme, lieu…)" class="flex-1 min-w-40 bg-stone-50 text-sm px-3 py-2 rounded-xl border border-stone-200 placeholder-stone-400">
+          <select id="en-type" class="bg-stone-50 text-sm px-2 py-2 rounded-xl border border-stone-200 text-stone-600">
+            <option value="organisation">Organisation</option>
+            <option value="personne">Personne</option>
+            <option value="institution">Institution publique</option>
+            <option value="lieu">Lieu</option>
+          </select>
+          <button id="en-save" class="bg-stone-900 text-white text-xs font-bold px-4 py-2 rounded-xl hover:bg-stone-800 transition cursor-pointer">Lier</button>
+        </div>
+        <p id="en-msg" class="text-xs text-emerald-700 mt-1"></p>
+      </div>
     </section>
 
     <section id="affs" class="hidden mt-8">
@@ -127,6 +147,7 @@
         } else {
           document.getElementById('d-source').textContent='source libre';
         }
+        if(typeof chargerEntites==='function') chargerEntites(doc.id);
 
         const groups=trierAffs(afs||[]);
         if(groups.length){
@@ -160,6 +181,48 @@
         document.getElementById('loading').textContent='Erreur de chargement : '+e.message;
       }
     }
+    // ---- Entités citées par ce document (PDF p.7/p.9) ----
+    let _docNeuf=null;
+    async function chargerEntites(documentId){
+      _docNeuf=documentId;
+      const z=document.getElementById('entites-list'); if(!z) return;
+      try{
+        const links=await get('/rest/v1/document_entites?select=*,entites(nom,type)&document_id=eq.'+encodeURIComponent(documentId))||[];
+        if(!links||!links.length){ z.innerHTML='<span class="text-stone-400 text-xs">Aucune entité citée pour l\'instant.</span>'; return; }
+        z.innerHTML=links.map(l=>{
+          const e=(l.entites&&l.entites[0])?l.entites[0]:l.entites;
+          const nom=e&&e.nom?e.nom:'?', typ=e&&e.type?e.type:'?';
+          const ic={personne:'👤',organisation:'🏢',institution:'🏛',lieu:'📍'}[typ]||'🏷';
+          return `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-stone-100 border border-stone-200">${ic} ${esc(nom)} <span class="text-stone-400 text-[10px]">${esc(typ)}</span></span>`;
+        }).join('');
+      }catch(e){ z.innerHTML='<span class="text-red-500">Erreur : '+esc(e.message)+'</span>'; }
+    }
+    const tglE=document.getElementById('toggle-entite'), efrm=document.getElementById('entite-form');
+    if(tglE) tglE.addEventListener('click',()=>{ if(!_docNeuf) return; efrm.classList.toggle('hidden'); });
+    document.getElementById('en-save').addEventListener('click', async ()=>{
+      const nom=document.getElementById('en-nom').value.trim();
+      const typ=document.getElementById('en-type').value;
+      const mg=document.getElementById('en-msg');
+      if(!nom){ mg.textContent='Nom requis.'; return; }
+      if(!_docNeuf){ mg.textContent='Ouvrez d\'abord un document.'; return; }
+      mg.textContent='Liaison…';
+      try{
+        // trouver une entité existante du même nom ou en créer une (publique)
+        const found=await get('/rest/v1/entites?select=id,nom&nom=ilike.'+encodeURIComponent(nom)+'&limit=1');
+        let ent=found&&found[0]?found[0]:null;
+        if(!ent){
+          const r=await fetch(API+'/rest/v1/entites',{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Accept':'application/json','Prefer':'return=representation'},body:JSON.stringify({nom,type:typ})});
+          if(!r.ok){ let m='HTTP '+r.status; try{const j=await r.json();m=j.message||m;}catch(e){} throw new Error(m); }
+          const j=await r.json(); ent=j&&j[0]||{id:null};
+        }
+        if(ent&&ent.id){
+          const jr=await fetch(API+'/rest/v1/document_entites',{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify({document_id:_docNeuf,entite_id:ent.id})});
+          if(!jr.ok) throw new Error('Liaison HTTP '+jr.status);
+        }
+        document.getElementById('en-nom').value=''; efrm.classList.add('hidden');
+        mg.textContent='✅ Entité liée.'; chargerEntites(_docNeuf);
+      }catch(e){ mg.textContent='Erreur : '+e.message; }
+    });
     main();
   </script>
 </body>
