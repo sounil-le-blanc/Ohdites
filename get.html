@@ -75,6 +75,7 @@
     const KEY = 'sb_publishable_fAefpcpQfoolCPlQwBzxlg_0M9-jfRV';
     const params = new URLSearchParams(window.location.search);
     const get_id = params.get('id');
+    let getDomaineId = null; // domaine du GÉT — hérité par les nouveaux dossiers
 
     function esc(t){ const d=document.createElement('div'); d.textContent=(t==null?'':String(t)); return d.innerHTML; }
     async function api(method, path, body){
@@ -114,6 +115,8 @@
         const g=await api('GET','/rest/v1/gets?select=*,domaines(nom)&id=eq.'+encodeURIComponent(get_id));
         const gt=g&&g[0];
         if(!gt){ head.innerHTML='<p class="text-red-600">GÉT introuvable.</p>'; return; }
+        // Conserver le domaine du GÉT : tout dossier créé hérite de ce domaine
+        getDomaineId = gt.domaine_id || null;
         head.innerHTML=`
           <div class="flex items-start justify-between gap-3">
             <div><h1 class="text-2xl font-black text-stone-900">${gt.nom ? '📺 '+esc(gt.nom) : ''}</h1>
@@ -156,7 +159,7 @@
       const resume=document.getElementById('nvo-dossier-resume').value.trim();
       if(!titre){ alert('Titre du dossier requis.'); return; }
       try{
-        await api('POST','/rest/v1/dossiers',{titre,resume:resume||null,get_id});
+        await api('POST','/rest/v1/dossiers',{titre,resume:resume||null,get_id,domaine_id:getDomaineId});
         document.getElementById('nvo-dossier-titre').value='';
         document.getElementById('nvo-dossier-resume').value='';
         chargerDossiers();
