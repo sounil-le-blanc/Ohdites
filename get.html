@@ -61,7 +61,10 @@
       </div>
     </div>
 
-    <!-- Les dossiers de travail du GÉT -->
+    <!-- Avancement de l'audit de ce GÉT (boucle du PDF : source→dossier→verif→rapport) -->
+    <div class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3" id="get-stats"></div>
+
+    <!-- Dossiers de travail du GÉT -->
     <div class="mt-8">
       <h3 class="font-bold text-stone-900 mb-3">📂 Dossiers de travail de ce GÉT</h3>
       <div id="liste-dossiers" class="flex flex-col gap-4"><p class="text-stone-400 text-sm">Chargement…</p></div>
@@ -290,8 +293,29 @@
       try{ await api('DELETE','/rest/v1/comptes?id=eq.'+b.dataset.id); chargerComptes(); }catch(e){ alert('Erreur : '+e.message); }
     });
 
+    // --- Petit bandeau d'avancement de l'audit de ce GÉT (boucle PDF) ---
+    async function rafraichirStats(){
+      const z=document.getElementById('get-stats'); if(!z) return;
+      try{
+        const ds=await api('GET','/rest/v1/dossiers?select=id&get_id=eq.'+encodeURIComponent(get_id)+'&limit=500')||[];
+        const cr=await api('GET','/rest/v1/comptes?select=id&get_id=eq.'+encodeURIComponent(get_id)+'&limit=500')||[];
+        const fiche=await api('GET','/rest/v1/gets?select=fiche_projet&id=eq.'+encodeURIComponent(get_id));
+        const aFiche=(fiche&&fiche[0]&&fiche[0].fiche_projet)?true:false;
+        z.innerHTML=[
+          ['🗂',(ds||[]).length,'Dossiers de travail'],
+          ['📝',(cr||[]).length,'Comptes-rendus'],
+          ['🧾', aFiche?'✅':'—','Fiche projet'],
+          ['🧭','en cours','État de l\'audit']
+        ].map(s=>`<div class="bg-white rounded-2xl border border-stone-200/60 p-3 text-center"><div class="text-lg font-black text-stone-800">${s[0]} ${s[1]}</div><div class="text-[11px] text-stone-500">${s[2]}</div></div>`).join('');
+      }catch(e){ /* silencieux */ }
+    }
+    // rafraîchi à chaque ajout
+    const _sa=document.getElementById('btn-creer-dossier');
+    if(_sa) _sa.addEventListener('click', ()=>setTimeout(rafraichirStats,400));
+
     chargerGet();
     chargerDossiers();
+    rafraichirStats();
   </script>
 </body>
 </html>
