@@ -66,6 +66,35 @@
       <h3 class="font-bold text-stone-900 mb-3">📂 Dossiers de travail de ce GÉT</h3>
       <div id="liste-dossiers" class="flex flex-col gap-4"><p class="text-stone-400 text-sm">Chargement…</p></div>
     </div>
+
+    <!-- Fiche projet du GÉT (PDF p.10 : produit une "fiche projet") -->
+    <div class="mt-8 bg-white rounded-2xl border border-stone-200/60 p-6">
+      <div class="flex justify-between items-center flex-wrap gap-2 mb-2">
+        <h3 class="font-bold text-stone-900">🧾 Fiche projet</h3>
+        <button id="editer-fiche" class="text-xs text-emerald-700 font-semibold hover:underline cursor-pointer bg-transparent">✏️ Éditer</button>
+      </div>
+      <div id="fiche-affichage" class="text-sm text-stone-600 whitespace-pre-line"></div>
+      <textarea id="fiche-edit" rows="5" class="hidden w-full bg-stone-50 text-sm px-3 py-2 rounded-xl border border-stone-200 placeholder-stone-400" placeholder="Périmètre, objectif(s), méthode, jalons…"></textarea>
+      <div class="hidden mt-2 flex justify-end gap-2" id="fiche-actions">
+        <button id="fiche-cancel" class="text-xs px-4 py-2 rounded-xl bg-stone-200 text-stone-700 hover:bg-stone-300 transition cursor-pointer">Annuler</button>
+        <button id="fiche-save" class="text-xs px-4 py-2 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition cursor-pointer">Enregistrer</button>
+      </div>
+      <p id="fiche-msg" class="text-xs text-emerald-700 mt-1"></p>
+    </div>
+
+    <!-- Comptes-rendus (PDF p.10 : groupe "produit (...) des comptes rendus") -->
+    <div class="mt-6 bg-white rounded-2xl border border-stone-200/60 p-6">
+      <h3 class="font-bold text-stone-900 mb-2">📝 Comptes-rendus</h3>
+      <div class="flex flex-col sm:flex-row gap-2 mb-2">
+        <input id="cr-titre" type="text" placeholder="Compte-rendu du (date / séance, ex : 05-09)" class="flex-1 bg-stone-50 text-sm px-3 py-2 rounded-xl border border-stone-200 placeholder-stone-400">
+      </div>
+      <textarea id="cr-contenu" rows="3" placeholder="Ce qui a été fait / décidé, prochaines étapes…" class="w-full bg-stone-50 text-sm px-3 py-2 rounded-xl border border-stone-200 placeholder-stone-400"></textarea>
+      <div class="mt-2 flex items-center justify-between gap-2">
+        <span id="cr-msg" class="text-xs text-emerald-700"></span>
+        <button id="cr-add" class="bg-stone-900 text-white text-xs font-bold px-5 py-2.5 rounded-xl hover:bg-stone-800 transition cursor-pointer">Ajouter le compte-rendu</button>
+      </div>
+      <div id="liste-cr" class="mt-4 space-y-2"></div>
+    </div>
   </main>
 
   <!-- MODAL DE CONFIRMATION -->
@@ -139,6 +168,12 @@
         const _rr=document.getElementById('role-resp'), _rs=document.getElementById('role-sec');
         if(_rr) _rr.value=gt.responsable||'';
         if(_rs) _rs.value=gt.secretaire||'';
+        // Fiche projet : affichage du texte (zone dédiée), invocation de l'édition via le bouton dédié
+        const _fa=document.getElementById('fiche-affichage');
+        const _fe=document.getElementById('fiche-edit');
+        if(_fa) _fa.textContent = (gt.fiche_projet&&gt.fiche_projet.trim()) ? gt.fiche_projet : 'Pas encore de fiche projet. Décrivez objectif / périmètre / méthode.';
+        if(_fe) _fe.value = gt.fiche_projet||'';
+        chargerComptes();
         head.innerHTML=`
           <div class="flex items-start justify-between gap-3">
             <div><h1 class="text-2xl font-black text-stone-900">${gt.nom ? '📺 '+esc(gt.nom) : ''}</h1>
@@ -201,6 +236,58 @@
         msg.textContent='✅ Rôles mis à jour.';
         chargerGet();
       }catch(e){ msg.textContent='Erreur : '+e.message; }
+    });
+
+    // --- Fiche-projet : édition & enregistrement (PDF p.10) ---
+    function toggleFiche(editMode){
+      const fa=document.getElementById('fiche-affichage');
+      const fe=document.getElementById('fiche-edit');
+      const act=document.getElementById('fiche-actions');
+      if(editMode){ fa.classList.add('hidden'); fe.classList.remove('hidden'); act.classList.remove('hidden'); }
+      else { fa.classList.remove('hidden'); fe.classList.add('hidden'); act.classList.add('hidden'); }
+    }
+    const ef=document.getElementById('editer-fiche');
+    if(ef) ef.addEventListener('click',()=>toggleFiche(true));
+    document.getElementById('fiche-cancel').addEventListener('click',()=>toggleFiche(false));
+    document.getElementById('fiche-save').addEventListener('click', async ()=>{
+      const contenu=document.getElementById('fiche-edit').value.trim();
+      const msg=document.getElementById('fiche-msg'); msg.textContent='Enregistrement…';
+      try{
+        await api('PATCH','/rest/v1/gets?id=eq.'+encodeURIComponent(get_id),{fiche_projet:contenu||null});
+        msg.textContent='✅ Fiche projet enregistrée.'; chargerGet();
+      }catch(e){ msg.textContent='Erreur : '+e.message; }
+    });
+
+    // --- Comptes-rendus (PDF p.10) ---
+    async function chargerComptes(){
+      const z=document.getElementById('liste-cr'); if(!z) return;
+      try{
+        const d=await api('GET','/rest/v1/comptes?select=*&get_id=eq.'+encodeURIComponent(get_id)+'&order=date_cr.desc')||[];
+        if(!d||!d.length){ z.innerHTML='<p class="text-sm text-stone-400">Aucun compte-rendu pour l\'instant.</p>'; return; }
+        z.innerHTML=d.map(c=>{
+          const dt=new Date(c.date_cr).toLocaleDateString('fr-FR');
+          return `<div class="border border-stone-200 rounded-xl p-3">
+            <div class="flex items-center justify-between gap-2"><b class="text-sm text-stone-800">📝 ${esc(c.titre)}</b>
+              <span class="text-xs text-stone-400">${dt}</span>
+              <button class="del-cr text-xs text-red-500 hover:text-red-700 cursor-pointer ml-auto" data-id="${esc(c.id)}">Supprimer</button></div>
+            ${c.contenu?`<div class="text-sm text-stone-600 mt-1 whitespace-pre-line">${esc(c.contenu)}</div>`:''}
+          </div>`;
+        }).join('');
+      }catch(e){ z.innerHTML='<p class="text-red-600 text-xs">Erreur CR : '+esc(e.message)+'</p>'; }
+    }
+    document.getElementById('cr-add').addEventListener('click', async ()=>{
+      const t=document.getElementById('cr-titre').value.trim();
+      const c=document.getElementById('cr-contenu').value.trim();
+      const msg=document.getElementById('cr-msg'); msg.textContent='';
+      if(!t){ msg.textContent='Titre du compte-rendu requis.'; return; }
+      msg.textContent='Ajout…';
+      try{ await api('POST','/rest/v1/comptes',{get_id,titre:t,contenu:c||null}); document.getElementById('cr-titre').value=''; document.getElementById('cr-contenu').value=''; msg.textContent='✅ Compte-rendu ajouté.'; chargerComptes(); }
+      catch(e){ msg.textContent='Erreur : '+e.message; }
+    });
+    document.addEventListener('click', async (ev)=>{
+      const b=ev.target.closest('.del-cr'); if(!b) return;
+      if(!confirm('Supprimer ce compte-rendu ?')) return;
+      try{ await api('DELETE','/rest/v1/comptes?id=eq.'+b.dataset.id); chargerComptes(); }catch(e){ alert('Erreur : '+e.message); }
     });
 
     chargerGet();
