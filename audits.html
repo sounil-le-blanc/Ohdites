@@ -198,6 +198,27 @@
           }
           h+='</div>';
 
+          // QUAND on explore un SECTEUR : montrer les affirmations qui lui sont liées (graphe réel)
+          if(secteur){
+            try{
+              const liefs=await get('/rest/v1/affirmation_secteurs?select=affirmation_id&secteur_id=eq.'+secteur);
+              if(liefs&&liefs.length){
+                const ids=liefs.map(x=>x.affirmation_id).join(',');
+                const affSec=await get('/rest/v1/affirmations?select=id,texte,statut,confirmations,contestations,dossier_id,documents!affirmations_document_id_fkey(id,titre,url)&id=in.('+ids+')');
+                if(affSec&&affSec.length){
+                  h+='<div class="bg-white rounded-2xl border border-stone-200/60 shadow-sm p-6 mt-4">'+
+                     '<h3 class="font-bold text-stone-900 mb-1">📌 Affirmations rattachées à ce secteur</h3>'+
+                     '<p class="text-xs text-stone-500 mb-2">Ce que ce secteur dit de façon factuelle — à discuter (graphe : une info peut appartenir à plusieurs secteurs).</p>';
+                  h+=affSec.map(a=>{
+                    const doc=a.documents?(Array.isArray(a.documents)?a.documents[0]:a.documents):null;
+                    return `<div class="border-l-2 pl-3 py-1 border-stone-200 mb-1"><a href="affirmation.html?id=${escv(a.id)}" class="text-sm text-stone-800 hover:text-emerald-700">${escv(a.texte)}</a> <span class="text-xs px-2 py-0.5 rounded-full ${COUL[a.statut]||'bg-stone-100'}" style="font-weight:bolder">${STATUT[a.statut]||a.statut}</span>${doc&&doc.id?' <span class="text-xs text-stone-400">— <a class="text-emerald-700 hover:underline" href="document.html?id='+escv(doc.id)+'">📄 source</a></span>':''}</div>`;
+                  }).join('');
+                  h+='</div>';
+                }
+              }
+            }catch(e){ /* le graphe secteur reste optionnel */ }
+          }
+
           // Bloc : les CHAÎNES (GÉT) du domaine — espaces de travail participatifs
           const getsDom=await get('/rest/v1/gets?select=id,nom,description,responsable&domaine_id=eq.'+did+'&order=nom');
           h+='<div class="bg-white rounded-2xl border border-stone-200/60 shadow-sm p-6">'+
