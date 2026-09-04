@@ -138,14 +138,24 @@
         const zone=document.getElementById('contenu-domaine');
         try {
           // domaine_id via slug
-          const doms=await get('/rest/v1/domaines?select=id&slug=eq.'+encodeURIComponent(domaine));
+          const doms=await get('/rest/v1/domaines?select=id,chiffres_cles,description&slug=eq.'+encodeURIComponent(domaine));
           if(!doms||!doms.length){ zone.innerHTML=''; return; }
           const did=doms[0].id;
+          const domChiffres = (doms[0].chiffres_cles||'').trim();
           // dossiers du domaine
           const dossiers=await get('/rest/v1/dossiers?select=id,titre,resume&domaine_id=eq.'+did);
           // affirmations du domaine (remonte via dossier) — avec id + document source (titre/url)
           const affs=await get('/rest/v1/affirmations?select=id,texte,statut,confirmations,contestations,commentaire,dossier_id,documents!affirmations_document_id_fkey(id,titre,url)&dossier_id=in.('+(dossiers.map(d=>d.id).join(',')||'00000000-0000-0000-0000-000000000000')+')');
           let h='';
+          // Bloc : chiffres / faits clés du domaine (PDF p.2 "chiffres clés")
+          if(domChiffres){
+            const lignes=domChiffres.split('\n').map(s=>s.trim()).filter(Boolean);
+            h+='<div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-5">'+
+               '<h3 class="font-bold text-emerald-900 mb-2 flex items-center gap-2">⚡ Faits &amp; chiffres clés</h3>'+
+               '<ul class="space-y-1.5 text-sm text-emerald-900/80">'+
+               lignes.map(l=>'<li class="flex gap-2"><span class="text-emerald-600 shrink-0">•</span><span>'+escv(l)+'</span></li>').join('')+
+               '</ul></div>';
+          }
 
           // Bloc EXPLORATEUR : sous-bulles du graphe (secteurs + sujets liés au domaine)
           const secteurs=await get('/rest/v1/secteurs?select=id,nom&domaine_id=eq.'+did+'&order=nom');
