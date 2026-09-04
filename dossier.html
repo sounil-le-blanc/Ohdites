@@ -78,6 +78,18 @@
       <a id="open-rapport" href="#" class="bg-white text-emerald-700 font-bold text-sm px-4 py-2 rounded-xl shrink-0 hover:bg-emerald-50 transition no-underline">Voir le rapport →</a>
     </div>
 
+    <!-- Questions ouvertes du dossier (PDF p.3) -->
+    <div id="questions-block" class="hidden bg-white rounded-2xl border border-stone-200/60 p-5 mb-6">
+      <h3 class="font-bold text-stone-900 mb-1">❓ Questions ouvertes</h3>
+      <p class="text-xs text-stone-500 mb-3">Ce qu'on aimerait encore vérifier / comprendre sur ce dossier. Chacun peut contribuer.</p>
+      <div id="liste-questions" class="space-y-2 text-sm"></div>
+      <div class="mt-3 flex flex-col sm:flex-row gap-2">
+        <input id="nvo-question" type="text" placeholder="Ajouter une question ouverte…" class="flex-1 bg-stone-50 text-sm px-3 py-2 rounded-xl border border-stone-200 placeholder-stone-400">
+        <button id="btn-ajouter-question" class="bg-stone-900 text-white text-xs font-bold px-4 py-2 rounded-xl hover:bg-stone-800 transition cursor-pointer whitespace-nowrap">➕ Ajouter la question</button>
+      </div>
+      <p id="question-msg" class="text-xs text-emerald-700 mt-1"></p>
+    </div>
+
     <h2 class="text-lg font-bold text-stone-900 mb-3">Dossiers disponibles</h2>
     <div id="liste-dossiers" class="flex flex-col gap-4 mb-8">Chargement des dossiers…</div>
   </main>
@@ -186,6 +198,25 @@
     const rl=document.getElementById('rapport-link');
     const ol=document.getElementById('open-rapport');
     if(rl&&ol){ if(dossierCourant){ rl.classList.remove('hidden'); rl.classList.add('flex'); ol.href='rapport.html?id='+encodeURIComponent(dossierCourant); } else { rl.classList.add('hidden'); } }
+    // Questions ouvertes du dossier (PDF p.3)
+    const qblk=document.getElementById('questions-block');
+    if(qblk){ if(dossierCourant){ qblk.classList.remove('hidden'); chargerQuestions(dossierCourant); } else { qblk.classList.add('hidden'); } }
+    document.getElementById('btn-ajouter-question').addEventListener('click', async ()=>{
+      const q=document.getElementById('nvo-question').value.trim(); const m=document.getElementById('question-msg');
+      if(!q){ m.textContent='Une question est requise.'; return; }
+      if(!dossierCourant){ m.textContent='Ouvrez un dossier.'; return; }
+      m.textContent='Ajout…';
+      try{ await post('/rest/v1/dossier_questions',{dossier_id:dossierCourant,question:q}); document.getElementById('nvo-question').value=''; m.textContent='✅ Question ajoutée.'; chargerQuestions(dossierCourant); }
+      catch(e){ m.textContent='Erreur : '+e.message; }
+    });
+    async function chargerQuestions(did){
+      const z=document.getElementById('liste-questions'); if(!z) return;
+      try{
+        const d=await get('/rest/v1/dossier_questions?select=id,question,contexte,statue&dossier_id=eq.'+encodeURIComponent(did)+'&order=cree_le')||[];
+        if(!d||!d.length){ z.innerHTML='<p class="text-xs text-stone-400">Aucune question ouverte pour l\'instant.</p>'; return; }
+        z.innerHTML=d.map(x=>`<div class="flex items-start justify-between gap-2 border-l-2 border-stone-200 pl-3"><span>${esc(x.question)}</span>${x.statue?'<span class="text-xs text-emerald-700 shrink-0">✔ '+esc(x.statue)+'</span>':''}</div>`).join('');
+      }catch(e){ z.innerHTML='<p class="text-xs text-red-500">'+esc(e.message)+'</p>'; }
+    }
     document.getElementById('btn-affirmer').addEventListener('click', async ()=>{
       const texte=document.getElementById('aff-texte').value.trim();
       const src=document.getElementById('aff-source').value.trim();
