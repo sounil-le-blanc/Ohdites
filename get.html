@@ -35,6 +35,20 @@
       <p class="text-stone-400 text-sm">Chargement du GÉT…</p>
     </div>
 
+    <!-- Désigner les rôles (PDF p.10 : au minimum responsable + secrétaire) -->
+    <div class="mt-4 bg-white rounded-2xl border border-stone-200/60 p-5">
+      <div class="flex justify-between items-center gap-3 flex-wrap">
+        <h3 class="font-bold text-stone-900">👥 Rôles du GÉT</h3>
+        <button id="toggle-roles" class="text-xs text-emerald-700 font-semibold hover:underline cursor-pointer bg-transparent">✏️ Désigner / modifier</button>
+      </div>
+      <div id="roles-edit" class="hidden mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <input id="role-resp" type="text" placeholder="👤 Responsable" class="bg-stone-50 text-sm px-3 py-2 rounded-xl border border-stone-200 placeholder-stone-400">
+        <input id="role-sec"  type="text" placeholder="🗒 Secrétaire"  class="bg-stone-50 text-sm px-3 py-2 rounded-xl border border-stone-200 placeholder-stone-400">
+        <button id="btn-save-roles" class="bg-stone-900 text-white text-xs font-bold px-4 py-2 rounded-xl hover:bg-stone-800 transition cursor-pointer">Enregistrer</button>
+      </div>
+      <p id="role-msg" class="text-xs text-emerald-700 mt-2"></p>
+    </div>
+
     <!-- Créer un dossier de travail dans ce GÉT -->
     <div id="bloc-creer-dossier" class="mt-6 bg-white rounded-2xl border border-stone-200/60 p-6">
       <h3 class="font-bold text-stone-900 mb-3">📁 Créer un dossier de travail</h3>
@@ -121,6 +135,10 @@
         if(!gt){ head.innerHTML='<p class="text-red-600">GÉT introuvable.</p>'; return; }
         // Conserver le domaine du GÉT : tout dossier créé hérite de ce domaine
         getDomaineId = gt.domaine_id || null;
+        // Pré-remplir les champs rôles (responsable / secrétaire) pour édition
+        const _rr=document.getElementById('role-resp'), _rs=document.getElementById('role-sec');
+        if(_rr) _rr.value=gt.responsable||'';
+        if(_rs) _rs.value=gt.secretaire||'';
         head.innerHTML=`
           <div class="flex items-start justify-between gap-3">
             <div><h1 class="text-2xl font-black text-stone-900">${gt.nom ? '📺 '+esc(gt.nom) : ''}</h1>
@@ -168,6 +186,21 @@
         document.getElementById('nvo-dossier-resume').value='';
         chargerDossiers();
       }catch(e){ alert('Erreur : '+e.message); }
+    });
+
+    // --- Désigner responsable / secrétaire (rôles obligatoires du GÉT) ---
+    const tgl=document.getElementById('toggle-roles'), redit=document.getElementById('roles-edit');
+    if(tgl && redit) tgl.addEventListener('click',()=>{ redit.classList.toggle('hidden'); });
+    document.getElementById('btn-save-roles').addEventListener('click', async ()=>{
+      const responsable=document.getElementById('role-resp').value.trim();
+      const secretaire=document.getElementById('role-sec').value.trim();
+      const msg=document.getElementById('role-msg');
+      msg.textContent='Enregistrement…';
+      try{
+        await api('PATCH','/rest/v1/gets?id=eq.'+encodeURIComponent(get_id),{responsable:responsable||null,secretaire:secretaire||null});
+        msg.textContent='✅ Rôles mis à jour.';
+        chargerGet();
+      }catch(e){ msg.textContent='Erreur : '+e.message; }
     });
 
     chargerGet();
