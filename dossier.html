@@ -52,6 +52,23 @@
       <p id="aff-msg" class="text-sm text-emerald-600 mt-2"></p>
     </div>
 
+    <!-- Ajouter un DOCUMENT SOURCE à ce dossier (pluralité documentaire, PDF p.4-9) -->
+    <div id="doc-block" class="hidden bg-white rounded-2xl border border-stone-200/60 p-6 mb-8">
+      <h3 class="font-bold text-stone-900 mb-1">📄 Ajouter un document source à ce dossier</h3>
+      <p class="text-xs text-stone-500 mb-3">Rapport officiel, article, donnée publique… Chaque affirmation future devra s'y référer.</p>
+      <div class="flex flex-col gap-2">
+        <input id="doc-titre" type="text" placeholder="Titre du document" class="w-full bg-stone-50 text-sm px-4 py-3 rounded-xl border border-stone-200 placeholder-stone-400">
+        <div class="flex flex-col sm:flex-row gap-2">
+          <input id="doc-url" type="url" placeholder="URL du document / de la source" class="flex-1 bg-stone-50 text-sm px-4 py-2.5 rounded-xl border border-stone-200 placeholder-stone-400">
+          <input id="doc-type" type="text" placeholder="Type (rapport, article, donnée…)" class="sm:w-48 bg-stone-50 text-sm px-4 py-2.5 rounded-xl border border-stone-200 placeholder-stone-400">
+        </div>
+        <div class="flex justify-end">
+          <button id="btn-ajouter-doc" class="bg-stone-900 text-white text-sm font-bold px-6 py-2.5 rounded-xl hover:bg-stone-800 transition cursor-pointer">➕ Ajouter ce document</button>
+        </div>
+        <p id="doc-msg" class="text-sm text-emerald-600 -mt-1"></p>
+      </div>
+    </div>
+
     <h2 class="text-lg font-bold text-stone-900 mb-3">Dossiers disponibles</h2>
     <div id="liste-dossiers" class="flex flex-col gap-4 mb-8">Chargement des dossiers…</div>
   </main>
@@ -154,6 +171,8 @@
     const dossierCourant = pp.get('d');
     const propBlock=document.getElementById('proposer-block');
     if(propBlock){ if(dossierCourant){ propBlock.classList.remove('hidden'); } else { propBlock.classList.add('hidden'); } }
+    const docBlock=document.getElementById('doc-block');
+    if(docBlock){ if(dossierCourant){ docBlock.classList.remove('hidden'); } else { docBlock.classList.add('hidden'); } }
     document.getElementById('btn-affirmer').addEventListener('click', async ()=>{
       const texte=document.getElementById('aff-texte').value.trim();
       const src=document.getElementById('aff-source').value.trim();
@@ -182,6 +201,25 @@
         msg.textContent='✅ Affirmation déposée dans ce dossier, liée à sa source.';
         document.getElementById('aff-texte').value=''; document.getElementById('aff-source').value='';
         chargerDossiers();
+        if(typeof remplirDetail==='function') remplirDetail(dossierCourant);
+      }catch(e){ msg.textContent='Erreur : '+e.message; }
+    });
+
+    // Ajouter un document source directement dans ce dossier
+    document.getElementById('btn-ajouter-doc').addEventListener('click', async ()=>{
+      const titre=document.getElementById('doc-titre').value.trim();
+      const url=document.getElementById('doc-url').value.trim();
+      const type=document.getElementById('doc-type').value.trim();
+      const msg=document.getElementById('doc-msg');
+      if(!titre){ msg.textContent='Le titre est requis.'; return; }
+      if(!url){ msg.textContent='🔗 L’URL du document est requise (c’est ce qui permet de vérifier).'; return; }
+      if(!dossierCourant){ msg.textContent='Ouvrez d\'abord un dossier pour y rattacher ce document.'; return; }
+      msg.textContent='Envoi…';
+      try{
+        const rf=await fetch(API+'/rest/v1/documents',{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Accept':'application/json','Prefer':'return=representation'},body:JSON.stringify({titre,url,type_document:type||'document',dossier_id:dossierCourant})});
+        if(!rf.ok){ let m='HTTP '+rf.status; try{const j=await rf.json();m=j.message||m;}catch(e){} throw new Error(m); }
+        document.getElementById('doc-titre').value=''; document.getElementById('doc-url').value=''; document.getElementById('doc-type').value='';
+        msg.textContent='✅ Document ajouté au dossier.';
         if(typeof remplirDetail==='function') remplirDetail(dossierCourant);
       }catch(e){ msg.textContent='Erreur : '+e.message; }
     });
