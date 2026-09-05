@@ -84,7 +84,7 @@
   <script>
     // ===== Permissions selon le rôle (étape 3) =====
     (function(){
-      function roleCourant(){ try{ const c=(window.ohditesGetCompte&&window.ohditesGetCompte())||null; return c?c.role:null; }catch(e){ return null; } }
+      function roleCourant(){ try{ const v=new URLSearchParams(location.search).get('voir'); if(v) return v; const c=(window.ohditesGetCompte&&window.ohditesGetCompte())||null; return c?c.role:null; }catch(e){ return null; } }
       function appliquer(){
         const r=roleCourant();
         const citoyenOk=(r==='citoyen'||r==='moderateur');
