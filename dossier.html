@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dossiers d'enquête — Oh Dites !</title>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <script src="compte.js"></script>
+  <script src="permissions.js"></script>
   <link rel="icon" type="image/png" href="./favicon-96x96.png" sizes="96x96" />
   <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
   <link rel="shortcut icon" href="./favicon.ico" />
@@ -41,7 +43,7 @@
     </div>
 
     <!-- Proposer une affirmation DANS ce dossier de travail (domaine + dossier implicites) -->
-    <div id="proposer-block" class="bg-white rounded-2xl border border-stone-200/60 p-6 mb-8">
+    <div id="proposer-block" data-perm="citoyen" class="bg-white rounded-2xl border border-stone-200/60 p-6 mb-8">
       <h3 class="font-bold text-stone-900 mb-1">💡 Proposer une affirmation dans ce dossier</h3>
       <p class="text-xs text-stone-500 mb-3">Le domaine et le dossier sont déjà fixés (vous êtes dans ce dossier de travail).</p>
       <textarea id="aff-texte" rows="2" placeholder="L'affirmation : « … » (à vérifier, pas un slogan)" class="w-full bg-stone-50 text-sm px-4 py-3 rounded-xl border border-stone-200 placeholder-stone-400"></textarea>
@@ -53,7 +55,7 @@
     </div>
 
     <!-- Ajouter un DOCUMENT SOURCE à ce dossier (pluralité documentaire, PDF p.4-9) -->
-    <div id="doc-block" class="hidden bg-white rounded-2xl border border-stone-200/60 p-6 mb-8">
+    <div id="doc-block" data-perm="citoyen" class="hidden bg-white rounded-2xl border border-stone-200/60 p-6 mb-8">
       <h3 class="font-bold text-stone-900 mb-1">📄 Ajouter un document source à ce dossier</h3>
       <p class="text-xs text-stone-500 mb-3">Rapport officiel, article, donnée publique… Chaque affirmation future devra s'y référer.</p>
       <div class="flex flex-col gap-2">
