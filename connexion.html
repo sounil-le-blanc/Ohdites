@@ -3,104 +3,143 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Connexion — Oh Dites !</title>
+  <title>Comptes & rôles — Oh Dites !</title>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="icon" type="image/png" href="./favicon-96x96.png" sizes="96x96"/>
 </head>
 <body class="bg-stone-50 text-stone-800 font-sans min-h-screen flex flex-col">
-  <header class="w-full max-w-7xl mx-auto px-6 py-4 flex items-center justify-between border-b border-stone-200">
-    <a href="index.html" class="flex items-center gap-3">
+  <header class="w-full max-w-6xl mx-auto px-6 py-4 flex items-center justify-between border-b border-stone-200">
+    <a href="index.html" class="flex items-center gap-2">
       <img src="images/cerveau-mains-relief.webp" alt="logo" class="w-8 h-8 object-contain">
       <span class="text-2xl font-black tracking-tight text-emerald-700">Oh Dites !</span>
     </a>
-    <nav class="flex gap-6 text-sm font-semibold text-stone-600">
+    <nav class="flex gap-6 text-sm font-semibold text-stone-600 items-center">
       <a href="index.html" class="hover:text-emerald-700">Accueil</a>
-      <a href="affirmations.html" class="hover:text-emerald-700">Affirmations</a>
       <a href="charte.html" class="hover:text-emerald-700">Charte</a>
+      <span id="header-etat" class="hidden"></span>
     </nav>
   </header>
 
-  <main class="w-full max-w-md mx-auto px-6 py-10 flex-grow">
-    <div class="bg-white rounded-3xl border border-stone-200/70 shadow-sm p-8">
-      <div class="flex items-center justify-between">
-        <h1 id="titre-auth" class="text-2xl font-black text-stone-900">🔑 Se connecter</h1>
-        <span id="session-badge" class="hidden text-xs bg-emerald-100 text-emerald-800 px-2 py-1 rounded-full">connecté</span>
-      </div>
-      <p class="text-sm text-stone-500 mt-1 mb-5">Un compte permet de contribuer de façon tracée. Les faits restent publics.</p>
+  <main class="w-full max-w-6xl mx-auto px-6 py-8 flex-grow">
+    <h1 class="text-2xl font-black text-stone-900 mb-1">Rôles & permissions</h1>
+    <p class="text-stone-500 text-sm mb-6">Qui peut faire quoi sur Oh Dites ? Lisez le guide, puis connectez-vous pour tester le rôle de votre choix.</p>
 
-      <!-- état en session -->
-      <div id="logged" class="hidden">
-        <p class="text-lg font-bold">Bonjour <span id="user-email"></span> 👋</p>
-        <p class="text-sm text-stone-500 mb-4">Votre rôle : <span id="user-role" class="font-semibold text-emerald-700">citoyen</span>.</p>
-        <button id="logout" class="w-full bg-stone-900 text-white font-bold px-6 py-3 rounded-xl hover:bg-stone-800 transition cursor-pointer">Se déconnecter</button>
+    <!-- Tableau des rôles -->
+    <div class="grid md:grid-cols-3 gap-4 mb-8">
+      <div class="bg-white rounded-2xl border p-5">
+        <div class="text-2xl mb-1">👀</div><div class="text-lg font-black">Visiteur</div>
+        <div class="text-xs font-bold uppercase text-stone-400 mb-2">sans compte</div>
+        <ul class="text-sm text-stone-600 space-y-1">
+          <li>✔ Consulter bulles, dossiers, documents</li>
+          <li>✔ Lire les affirmations & leur statut</li>
+          <li>✖ Contribuer / modifier</li>
+        </ul>
       </div>
+      <div class="bg-white rounded-2xl border p-5 border-emerald-200">
+        <div class="text-2xl mb-1">✍️</div><div class="text-lg font-black">Citoyen / contributeur</div>
+        <div class="text-xs font-bold uppercase text-emerald-500 mb-2">compte pseudo</div>
+        <ul class="text-sm text-stone-600 space-y-1">
+          <li>✔ Tout le visiteur</li>
+          <li>✔ Proposer une source / un document</li>
+          <li>✔ Proposer une affirmation (traçable)</li>
+          <li>✔ Confirmer / contester (participer)</li>
+          <li>✖ Modérer / supprimer des contenus</li>
+        </ul>
+      </div>
+      <div class="bg-white rounded-2xl border p-5 border-amber-300">
+        <div class="text-2xl mb-1">🛡️</div><div class="text-lg font-black">Modérateur</div>
+        <div class="text-xs font-bold uppercase text-amber-500 mb-2">admin / éditeur</div>
+        <ul class="text-sm text-stone-600 space-y-1">
+          <li>✔ Tout le citoyen</li>
+          <li>✔ Valider / trier les contributions</li>
+          <li>✔ Corriger, créer GÉT & sous-bulles</li>
+          <li>✔ Modérer (supprimer du contenu indésirable)</li>
+        </ul>
+      </div>
+    </div>
 
-      <!-- formulaire -->
-      <form id="auth-form" class="flex flex-col gap-3">
-        <label class="text-xs font-semibold uppercase tracking-wider text-stone-400">Email</label>
-        <input id="email" type="email" required placeholder="vous@exemple.fr"
-          class="bg-stone-50 text-sm px-4 py-3 rounded-xl border border-stone-200 placeholder-stone-400 focus:border-emerald-400 outline-none">
-        <label class="text-xs font-semibold uppercase tracking-wider text-stone-400 mt-1">Mot de passe</label>
-        <input id="password" type="password" required minlength="6" placeholder="••••••••"
-          class="bg-stone-50 text-sm px-4 py-3 rounded-xl border border-stone-200 placeholder-stone-400 focus:border-emerald-400 outline-none">
-        <div class="flex gap-3 mt-2">
-          <button type="button" id="btn-signin" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-3 rounded-xl transition cursor-pointer">Se connecter</button>
-          <button type="button" id="btn-signup" class="flex-1 bg-stone-900 hover:bg-stone-800 text-white font-bold px-5 py-3 rounded-xl transition cursor-pointer">Créer un compte</button>
+    <!-- Bloc compte (connecté) -->
+    <div id="logged" class="hidden bg-emerald-50 border border-emerald-200 rounded-2xl p-5 mb-6">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p class="text-lg font-black text-emerald-900">Bonjour <span id="lbl-pseudo"></span> 👋</p>
+          <p>Vous êtes <b id="lbl-role"></b> sur la démo.</p>
         </div>
-        <p id="msg" class="text-sm mt-2"></p>
+        <div class="flex gap-2">
+          <a href="index.html" class="bg-emerald-600 text-white text-sm font-bold px-4 py-2 rounded-xl hover:bg-emerald-700 transition">→ Continuer sur le site</a>
+          <button id="logout" class="bg-white border border-emerald-300 text-sm px-4 py-2 rounded-xl hover:bg-stone-50 transition cursor-pointer">Se déconnecter</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prise de compte / connexion -->
+    <div id="auth" class="bg-white rounded-2xl border p-6 max-w-2xl">
+      <h2 class="font-black text-lg mb-2">Connexion ou création d'un compte</h2>
+      <form id="login-form" class="grid sm:grid-cols-[1fr_1fr_auto] gap-2 mb-4 items-end">
+        <div><label class="text-xs uppercase text-stone-400 font-bold">Pseudo</label>
+          <input id="pseudo" class="w-full bg-stone-50 text-sm px-3 py-2.5 rounded-xl border placeholder-stone-400" placeholder="votre.pseudo"></div>
+        <div><label class="text-xs uppercase text-stone-400 font-bold">Mot de passe</label>
+          <input id="password" type="password" class="w-full bg-stone-50 text-sm px-3 py-2.5 rounded-xl border placeholder-stone-400" placeholder="••••••"></div>
+        <div class="flex gap-2">
+          <button id="btn-login" type="button" class="bg-emerald-600 text-white text-sm font-bold px-4 py-2.5 rounded-xl hover:bg-emerald-700 transition cursor-pointer">Se connecter</button>
+          <button id="btn-inscrire" type="button" class="bg-stone-900 text-white text-sm px-4 py-2.5 rounded-xl hover:bg-stone-800 transition cursor-pointer">Créer un compte</button>
+        </div>
       </form>
-      <p class="mt-4 text-[11px] text-stone-400">Connexion sécurisée via Supabase Auth. En créant un compte, vous pourrez proposer des sources et des affirmations de façon tracée.</p>
+      <p id="msg" class="text-sm mb-3"></p>
+
+      <div class="border-t border-stone-100 pt-3 mt-2">
+        <p class="text-xs text-stone-500 mb-2">Pour <b>essayer un rôle</b> sans créer de compte (comptes de démo) :</p>
+        <div class="flex flex-wrap gap-2">
+          <button class="demo-role bg-stone-100 text-xs font-bold px-4 py-2 rounded-xl hover:bg-stone-200 transition cursor-pointer" data-pseudo="tessa.citoyen" data-pass="demoCitoyen123">✍️ Se connecter Citoyen</button>
+          <button class="demo-role bg-amber-100 text-stone-700 text-xs font-bold px-4 py-2 rounded-xl hover:bg-amber-200 transition cursor-pointer" data-pseudo="tessa.moderateur" data-pass="demoMod123">🛡️ Se connecter Modérateur</button>
+        </div>
+        <p class="text-[11px] text-stone-400 mt-2">Mode démo : les permissions ne sont pas encore bloquées ici ; elles se verront via le rôle affiché. (Créer un compte crée un rôle <b>citoyen</b>.)</p>
+      </div>
     </div>
   </main>
 
   <footer class="border-t border-stone-200 text-center text-xs text-stone-400 py-4">© 2026 Oh Dites ! — Espace de compréhension, pas de combat.</footer>
 
   <script>
-    const SUPABASE_URL='https://trchckgeemvqlgbcrntz.supabase.co';
-    const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRyY2hja2dlZW12cWxnYmNybnR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODczNzM5OTUsImV4cCI6MjEwMjk0OTk1fQ.fRHYUrugYxKPQmJtTVaoG5ZBbXL4csP9SyqGy8-hT4M'; // clé anon (front)
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    const msg=document.getElementById('msg');
-    const emailEl=document.getElementById('email'), passEl=document.getElementById('password');
-
-    function esc(t){const d=document.createElement('div');d.textContent=(t==null?'':String(t));return d.innerHTML;}
-
-    async function rafraichirSession(){
-      const {data:{session}}=await sb.auth.getSession();
-      const logged=document.getElementById('logged'), auth=document.getElementById('auth-form'),
-            badge=document.getElementById('session-badge'), tit=document.getElementById('titre-auth');
-      if(session){
-        logged.classList.remove('hidden'); auth.classList.add('hidden'); badge.classList.remove('hidden');
-        document.getElementById('user-email').textContent=session.user.email||'vous';
-        tit.textContent='Vous êtes connecté·e';
-        // profil : créer/maj propre profil (rôle citoyen) via RPC sécurisé
-        try{
-          const {data:p,error}=await sb.rpc('creer_ou_maj_mon_profil',{p_email:session.user.email});
-          if(p) document.getElementById('user-role').textContent=p.role;
-        }catch(e){ /* silencieux */ }
+    const API='https://trchckgeemvqlgbcrntz.supabase.co', KEY='sb_publishable_fAefpcpQfoolCPlQwBzxlg_0M9-jfRV';
+    const SESS='ohdites_session';
+    function getCompte(){ try{ return JSON.parse(localStorage.getItem(SESS))||null }catch(e){return null} }
+    function setCompte(c){ localStorage.setItem(SESS, JSON.stringify(c)); }
+    window.ohditesGetCompte=getCompte;
+    async function rpc(fn, body){
+      const r=await fetch(API+'/rest/v1/rpc/'+fn,{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify(body)});
+      return r.json();
+    }
+    function majUI(){
+      const c=getCompte(); const hd=document.getElementById('header-etat');
+      const logged=document.getElementById('logged'), auth=document.getElementById('auth');
+      if(c){
+        logged.classList.remove('hidden'); auth.classList.add('hidden');
+        document.getElementById('lbl-pseudo').textContent=c.pseudo;
+        document.getElementById('lbl-role').textContent = c.role||'citoyen';
+        if(hd){ hd.classList.remove('hidden'); hd.textContent='👤 '+c.pseudo+' · '+(c.role||'citoyen'); }
       } else {
-        logged.classList.add('hidden'); auth.classList.remove('hidden'); badge.classList.add('hidden');
-        tit.textContent='🔑 Se connecter';
+        logged.classList.add('hidden'); auth.classList.remove('hidden');
+        if(hd) hd.classList.add('hidden');
       }
     }
-    async function start(){ const {data:{session}}=await sb.auth.getSession(); rafraichirSession(); }
-    sb.auth.onAuthStateChange(()=>rafraichirSession());
-
-    document.getElementById('btn-signin').addEventListener('click', async()=>{
-      msg.textContent='Connexion…';
-      const {error}=await sb.auth.signInWithPassword({email:emailEl.value,password:passEl.value});
-      if(error) return msg.textContent='❌ '+error.message;
-      rafraichirSession();
+    const msg=document.getElementById('msg');
+    async function login(pseudo,pass,cbErreur){
+      msg.textContent='…'; const j=await rpc('connexion_contributeur',{p_pseudo:pseudo,p_pass:pass});
+      if(j&&j.ok){ setCompte({pseudo:j.pseudo,role:j.role||'citoyen'}); majUI(); }
+      else msg.textContent = '❌ '+(j&&j.erreur||'erreur');
+      if(typeof cbErreur==='function'&&(!j||!j.ok)) cbErreur();
+    }
+    document.getElementById('btn-login').addEventListener('click', ()=> login(document.getElementById('pseudo').value, document.getElementById('password').value));
+    document.getElementById('btn-inscrire').addEventListener('click', async ()=>{
+      const pseudo=document.getElementById('pseudo').value.trim(), pass=document.getElementById('password').value;
+      msg.textContent='Création…'; const j=await rpc('inscription_contributeur',{p_pseudo:pseudo,p_pass:pass});
+      if(j&&j.ok){ msg.textContent='✅ Compte créé. Connectez-vous.'; }
+      else msg.textContent='❌ '+(j&&(j.erreur||'pseudo déjà pris')||'erreur');
     });
-    document.getElementById('btn-signup').addEventListener('click', async()=>{
-      msg.textContent='Création du compte…';
-      const {data,error}=await sb.auth.signUp({email:emailEl.value,password:passEl.value});
-      if(error) return msg.textContent='❌ '+error.message;
-      msg.textContent='✅ Compte créé. '+(data?.session?'Vous êtes connecté·e.':"Confirmez votre email, puis reconnectez-vous.");
-      rafraichirSession();
-    });
-    document.getElementById('logout').addEventListener('click', async()=>{ await sb.auth.signOut(); rafraichirSession(); msg.textContent='Déconnecté.'; });
-    start();
+    document.querySelectorAll('.demo-role').forEach(b=>b.addEventListener('click',()=>login(b.dataset.pseudo,b.dataset.pass)));
+    document.getElementById('logout').addEventListener('click',()=>{ localStorage.removeItem(SESS); majUI(); msg.textContent='Déconnecté.'; });
+    majUI();
   </script>
 </body>
 </html>
