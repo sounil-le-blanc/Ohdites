@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Affirmation — Oh Dites !</title>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <script src="compte.js"></script>
   <link rel="icon" type="image/png" href="./favicon-96x96.png" sizes="96x96" />
   <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
   <link rel="shortcut icon" href="./favicon.ico" />
@@ -41,6 +42,7 @@
         <button id="btn-contester" class="px-4 py-2 rounded-xl text-sm font-bold text-red-700 border border-red-300 hover:bg-red-50 transition cursor-pointer">✗ Contester</button>
         <button id="btn-commenter" class="px-4 py-2 rounded-xl text-sm font-bold text-stone-700 border border-stone-300 hover:bg-stone-100 transition cursor-pointer">💬 Commenter l'affirmation</button>
       </div>
+      <p id="permissions-note" class="text-xs mt-2 text-stone-600"></p>
       <div id="editeur-carte" class="hidden flex-col gap-2">
         <textarea id="carte-arg" rows="2" class="w-full bg-stone-50 text-sm px-4 py-3 rounded-xl border border-stone-200 placeholder-stone-400" placeholder="Votre argument (raison, source…)"></textarea>
         <input id="carte-source" type="url" placeholder="Source (URL) — optionnel" class="w-full bg-stone-50 text-sm px-4 py-2.5 rounded-xl border border-stone-200 placeholder-stone-400">
@@ -80,6 +82,33 @@
   </footer>
 
   <script>
+    // ===== Permissions selon le rôle (étape 3) =====
+    (function(){
+      function roleCourant(){ try{ const c=(window.ohditesGetCompte&&window.ohditesGetCompte())||null; return c?c.role:null; }catch(e){ return null; } }
+      function appliquer(){
+        const r=roleCourant();
+        const citoyenOk=(r==='citoyen'||r==='moderateur');
+        const modOk=(r==='moderateur');
+        ['btn-confirmer','btn-contester','btn-commenter'].forEach(id=>{
+          const el=document.getElementById(id); if(el) el.style.display= citoyenOk?'':'none';
+        });
+        const sup=document.getElementById('btn-suppr-aff'); if(sup) sup.style.display= modOk?'':'none';
+        // petite fenêtre d'explication selon le cas
+        const note=document.getElementById('permissions-note');
+        if(note){
+          if(!citoyenOk){ note.innerHTML='🔒 <b>Vous êtes visiteur</b> : pour confirmer/contester/commenter, <a href="connexion.html" style="text-decoration:underline">créez un compte ou connectez-vous</a>.';
+            note.classList.remove('hidden'); }
+          else if(!modOk){ note.innerHTML='✍️ <b>Citoyen</b> : vous pouvez participer. La <b>modération/suppression</b> est réservée aux modérateurs.';
+            note.classList.remove('hidden'); }
+          else { note.innerHTML='🛡️ <b>Modérateur</b> : vous avez les permissions complètes (participer + modérer).';
+            note.classList.remove('hidden'); }
+        }
+      }
+      // ré-agit quand la session change et après chaque création de bouton dynamique
+      appliquer();
+      const iv=setInterval(appliquer, 700); setTimeout(()=>clearInterval(iv), 8000);
+      window.addEventListener('storage', appliquer);
+    })();
     const API = 'https://trchckgeemvqlgbcrntz.supabase.co';
     const KEY = 'sb_publishable_fAefpcpQfoolCPlQwBzxlg_0M9-jfRV';
     const params = new URLSearchParams(window.location.search);
