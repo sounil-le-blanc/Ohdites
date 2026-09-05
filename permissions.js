@@ -26,5 +26,5 @@
   }
   window.addEventListener('DOMContentLoaded', ()=>{ appliquer(); setTimeout(appliquer,400); });
   window.addEventListener('storage', appliquer);
-  const iv=setInterval(appliquer, 900); setTimeout(()=>clearInterval(iv),5000);
+  const iv=setInterval(appliquer, 1400); setTimeout(()=>clearInterval(iv), 22000);
 })();
