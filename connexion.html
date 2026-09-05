@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion — Oh Dites !</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="icon" type="image/png" href="./favicon-96x96.png" sizes="96x96"/>
+</head>
+<body class="bg-stone-50 text-stone-800 font-sans min-h-screen flex flex-col">
+  <header class="w-full max-w-7xl mx-auto px-6 py-4 flex items-center justify-between border-b border-stone-200">
+    <a href="index.html" class="flex items-center gap-3">
+      <img src="images/cerveau-mains-relief.webp" alt="logo" class="w-8 h-8 object-contain">
+      <span class="text-2xl font-black tracking-tight text-emerald-700">Oh Dites !</span>
+    </a>
+    <nav class="flex gap-6 text-sm font-semibold text-stone-600">
+      <a href="index.html" class="hover:text-emerald-700">Accueil</a>
+      <a href="affirmations.html" class="hover:text-emerald-700">Affirmations</a>
+      <a href="charte.html" class="hover:text-emerald-700">Charte</a>
+    </nav>
+  </header>
+
+  <main class="w-full max-w-md mx-auto px-6 py-10 flex-grow">
+    <div class="bg-white rounded-3xl border border-stone-200/70 shadow-sm p-8">
+      <div class="flex items-center justify-between">
+        <h1 id="titre-auth" class="text-2xl font-black text-stone-900">🔑 Se connecter</h1>
+        <span id="session-badge" class="hidden text-xs bg-emerald-100 text-emerald-800 px-2 py-1 rounded-full">connecté</span>
+      </div>
+      <p class="text-sm text-stone-500 mt-1 mb-5">Un compte permet de contribuer de façon tracée. Les faits restent publics.</p>
+
+      <!-- état en session -->
+      <div id="logged" class="hidden">
+        <p class="text-lg font-bold">Bonjour <span id="user-email"></span> 👋</p>
+        <p class="text-sm text-stone-500 mb-4">Votre rôle : <span id="user-role" class="font-semibold text-emerald-700">citoyen</span>.</p>
+        <button id="logout" class="w-full bg-stone-900 text-white font-bold px-6 py-3 rounded-xl hover:bg-stone-800 transition cursor-pointer">Se déconnecter</button>
+      </div>
+
+      <!-- formulaire -->
+      <form id="auth-form" class="flex flex-col gap-3">
+        <label class="text-xs font-semibold uppercase tracking-wider text-stone-400">Email</label>
+        <input id="email" type="email" required placeholder="vous@exemple.fr"
+          class="bg-stone-50 text-sm px-4 py-3 rounded-xl border border-stone-200 placeholder-stone-400 focus:border-emerald-400 outline-none">
+        <label class="text-xs font-semibold uppercase tracking-wider text-stone-400 mt-1">Mot de passe</label>
+        <input id="password" type="password" required minlength="6" placeholder="••••••••"
+          class="bg-stone-50 text-sm px-4 py-3 rounded-xl border border-stone-200 placeholder-stone-400 focus:border-emerald-400 outline-none">
+        <div class="flex gap-3 mt-2">
+          <button type="button" id="btn-signin" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-3 rounded-xl transition cursor-pointer">Se connecter</button>
+          <button type="button" id="btn-signup" class="flex-1 bg-stone-900 hover:bg-stone-800 text-white font-bold px-5 py-3 rounded-xl transition cursor-pointer">Créer un compte</button>
+        </div>
+        <p id="msg" class="text-sm mt-2"></p>
+      </form>
+      <p class="mt-4 text-[11px] text-stone-400">Connexion sécurisée via Supabase Auth. En créant un compte, vous pourrez proposer des sources et des affirmations de façon tracée.</p>
+    </div>
+  </main>
+
+  <footer class="border-t border-stone-200 text-center text-xs text-stone-400 py-4">© 2026 Oh Dites ! — Espace de compréhension, pas de combat.</footer>
+
+  <script>
+    const SUPABASE_URL='https://trchckgeemvqlgbcrntz.supabase.co';
+    const SUPABASE_KEY='sb_publishable_fAefpcpQfoolCPlQwBzxlg_0M9-jfRV';
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const msg=document.getElementById('msg');
+    const emailEl=document.getElementById('email'), passEl=document.getElementById('password');
+
+    function esc(t){const d=document.createElement('div');d.textContent=(t==null?'':String(t));return d.innerHTML;}
+
+    async function rafraichirSession(){
+      const {data:{session}}=await sb.auth.getSession();
+      const logged=document.getElementById('logged'), auth=document.getElementById('auth-form'),
+            badge=document.getElementById('session-badge'), tit=document.getElementById('titre-auth');
+      if(session){
+        logged.classList.remove('hidden'); auth.classList.add('hidden'); badge.classList.remove('hidden');
+        document.getElementById('user-email').textContent=session.user.email||'vous';
+        tit.textContent='Vous êtes connecté·e';
+        // profil : créer/maj propre profil (rôle citoyen) via RPC sécurisé
+        try{
+          const {data:p,error}=await sb.rpc('creer_ou_maj_mon_profil',{p_email:session.user.email});
+          if(p) document.getElementById('user-role').textContent=p.role;
+        }catch(e){ /* silencieux */ }
+      } else {
+        logged.classList.add('hidden'); auth.classList.remove('hidden'); badge.classList.add('hidden');
+        tit.textContent='🔑 Se connecter';
+      }
+    }
+    async function start(){ const {data:{session}}=await sb.auth.getSession(); rafraichirSession(); }
+    sb.auth.onAuthStateChange(()=>rafraichirSession());
+
+    document.getElementById('btn-signin').addEventListener('click', async()=>{
+      msg.textContent='Connexion…';
+      const {error}=await sb.auth.signInWithPassword({email:emailEl.value,password:passEl.value});
+      if(error) return msg.textContent='❌ '+error.message;
+      rafraichirSession();
+    });
+    document.getElementById('btn-signup').addEventListener('click', async()=>{
+      msg.textContent='Création du compte…';
+      const {data,error}=await sb.auth.signUp({email:emailEl.value,password:passEl.value});
+      if(error) return msg.textContent='❌ '+error.message;
+      msg.textContent='✅ Compte créé. '+(data?.session?'Vous êtes connecté·e.':"Confirmez votre email, puis reconnectez-vous.");
+      rafraichirSession();
+    });
+    document.getElementById('logout').addEventListener('click', async()=>{ await sb.auth.signOut(); rafraichirSession(); msg.textContent='Déconnecté.'; });
+    start();
+  </script>
+</body>
+</html>
