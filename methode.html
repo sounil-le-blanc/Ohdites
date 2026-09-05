@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>La méthode — Oh Dites !</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <script src="compte.js" defer></script>
+  <script src="permissions.js"></script>
+  <link rel="icon" type="image/png" href="./favicon-96x96.png" sizes="96x96"/>
+</head>
+<body class="bg-stone-50 text-stone-800 font-sans min-h-screen flex flex-col">
+  <header class="w-full max-w-6xl mx-auto px-6 py-4 flex items-center justify-between border-b border-stone-200">
+    <a href="index.html" class="flex items-center gap-2">
+      <img src="images/cerveau-mains-relief.webp" alt="logo" class="w-8 h-8 object-contain">
+      <span class="text-2xl font-black tracking-tight text-emerald-700">Oh Dites !</span>
+    </a>
+    <nav class="flex items-center gap-6 text-sm font-semibold text-stone-600">
+      <a href="index.html" class="hover:text-emerald-700">Accueil</a>
+      <a href="methode.html" class="text-emerald-700 font-black">La méthode</a>
+      <a href="affirmations.html" class="hover:text-emerald-700">Affirmations</a>
+      <span id="compte-badge" class="inline-flex items-center text-xs px-2.5 py-1 rounded-full bg-stone-100 text-stone-500"></span>
+      <a href="connexion.html" class="bg-stone-900 text-white px-3 py-1.5 rounded-lg hover:bg-stone-700 transition no-underline">Se connecter · Rôles</a>
+    </nav>
+  </header>
+
+  <main class="w-full max-w-4xl mx-auto px-6 py-10 flex-grow">
+    <div class="text-center mb-8">
+      <p class="text-sm font-bold uppercase tracking-widest text-emerald-600">Comment ça marche ?</p>
+      <h1 class="text-3xl sm:text-4xl font-black text-stone-900 mt-2">Documenter des faits, pas trancher des débats.</h1>
+      <p class="text-stone-500 max-w-2xl mx-auto mt-3 text-sm leading-relaxed">Oh Dites ! est une méthode d'audit citoyen : on réunit les <b>documents sources</b>, on pose des <b>affirmations vérifiables</b> et on les classe par un <b>statut honnête</b> — jamais un simple « vrai / faux ».</p>
+    </div>
+
+    <!-- 4 étapes -->
+    <div class="grid md:grid-cols-2 gap-4 mb-8">
+      <div class="bg-white rounded-2xl border p-5">
+        <div class="text-2xl mb-1">📄</div><h2 class="font-black text-lg">1. On source</h2>
+        <p class="text-sm text-stone-600">Rapports officiels, données publiques, études : chaque document est référencé et consultable.</p>
+      </div>
+      <div class="bg-white rounded-2xl border p-5">
+        <div class="text-2xl mb-1">🔍</div><h2 class="font-black text-lg">2. On croise</h2>
+        <p class="text-sm text-stone-600">Les chiffres officiels sont confrontés entre eux, dans une structure en bulles (une info peut appartenir à plusieurs sujets).</p>
+      </div>
+      <div class="bg-white rounded-2xl border p-5">
+        <div class="text-2xl mb-1">✔</div><h2 class="font-black text-lg">3. On restitue une affirmation à statut</h2>
+        <p class="text-sm text-stone-600">Proposée → à vérifier → confirmée → nuancée → contestée… Chaque fait porte son statut, pas une prise de position.</p>
+      </div>
+      <div class="bg-white rounded-2xl border p-5">
+        <div class="text-2xl mb-1">🗣️</div><h2 class="font-black text-lg">4. On discute sans dogme</h2>
+        <p class="text-sm text-stone-600">Citoyens et vérificateurs confirment / contestent / commentent de façon contradictoire et traçable.</p>
+      </div>
+    </div>
+
+    <!-- Rôles -->
+    <div class="bg-white border rounded-2xl p-6 mb-8">
+      <h2 class="text-2xl font-black mb-3">Qui peut faire quoi ?</h2>
+      <div class="grid sm:grid-cols-3 gap-4 text-sm">
+        <div><b class="text-lg">👀 Visiteur</b><ul class="mt-1 space-y-1 text-stone-600"><li>Lit tout</li><li><span class="text-stone-400">— ne contribue pas</span></li></ul></div>
+        <div><b class="text-lg">✍️ Citoyen</b><ul class="mt-1 space-y-1 text-stone-600"><li>Propose une source / affirmation</li><li>Confirme, conteste, commente</li></ul></div>
+        <div><b class="text-lg">🛡️ Modérateur</b><ul class="mt-1 space-y-1 text-stone-600"><li>Fait tout ce que peut le citoyen</li><li>Crée GÉT & sous-bulles</li><li>Modère / supprime</li></ul></div>
+      </div>
+      <p class="text-xs text-stone-400 mt-4">Espace de compréhension, pas de combat. Aucune conclusion normative : les opinions appartiennent à chacun, les faits appartiennent à tous.</p>
+    </div>
+
+    <div class="text-center">
+      <a href="audits.html?domaine=energie" class="inline-block bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl transition">👀 Voir un exemple concret (Énergie) &nbsp;→</a>
+    </div>
+  </main>
+
+  <footer class="border-t border-stone-200 text-center text-xs text-stone-400 py-4">© 2026 Oh Dites ! — Licence d'usage perpétuelle &amp; gratuite accordée à l'Association.</footer>
+</body>
+</html>
