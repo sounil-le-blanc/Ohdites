@@ -24,36 +24,59 @@
     <h1 class="text-2xl font-black text-stone-900 mb-1">Rôles & permissions</h1>
     <p class="text-stone-500 text-sm mb-6">Qui peut faire quoi sur Oh Dites ? Lisez le guide, puis connectez-vous pour tester le rôle de votre choix.</p>
 
-    <!-- Tableau des rôles -->
-    <div class="grid md:grid-cols-3 gap-4 mb-8">
-      <div class="bg-white rounded-2xl border p-5">
+    <!-- Tableau des rôles (hiérarchie du PDF p.8 : six registres qui s'empilent) -->
+    <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
+      <div class="bg-white rounded-2xl border p-4">
         <div class="text-2xl mb-1">👀</div><div class="text-lg font-black">Visiteur</div>
         <div class="text-xs font-bold uppercase text-stone-400 mb-2">sans compte</div>
         <ul class="text-sm text-stone-600 space-y-1">
-          <li>✔ Consulter bulles, dossiers, documents</li>
+          <li>✔ Consulter bulles, dossiers, documents, rapports publiés</li>
           <li>✔ Lire les affirmations & leur statut</li>
           <li>✖ Contribuer / modifier</li>
         </ul>
       </div>
-      <div class="bg-white rounded-2xl border p-5 border-emerald-200">
-        <div class="text-2xl mb-1">✍️</div><div class="text-lg font-black">Citoyen / contributeur</div>
-        <div class="text-xs font-bold uppercase text-emerald-500 mb-2">compte pseudo</div>
+      <div class="bg-white rounded-2xl border p-4">
+        <div class="text-2xl mb-1">✍️</div><div class="text-lg font-black">Inscrit · contributeur</div>
+        <div class="text-xs font-bold uppercase text-stone-400 mb-2">compte pseudo</div>
         <ul class="text-sm text-stone-600 space-y-1">
           <li>✔ Tout le visiteur</li>
-          <li>✔ Proposer une source / un document</li>
-          <li>✔ Proposer une affirmation (traçable)</li>
-          <li>✔ Confirmer / contester (participer)</li>
-          <li>✖ Modérer / supprimer des contenus</li>
+          <li>✔ Déposer une source / un document</li>
+          <li>✔ Ajouter une affirmation (traçable)</li>
+          <li>✔ Relier des documents</li>
         </ul>
       </div>
-      <div class="bg-white rounded-2xl border p-5 border-amber-300">
-        <div class="text-2xl mb-1">🛡️</div><div class="text-lg font-black">Modérateur</div>
-        <div class="text-xs font-bold uppercase text-amber-500 mb-2">admin / éditeur</div>
+      <div class="bg-white rounded-2xl border border-amber-200 p-4">
+        <div class="text-2xl mb-1">🧐</div><div class="text-lg font-black">Vérificateur</div>
+        <div class="text-xs font-bold uppercase text-amber-500 mb-2">confirmé</div>
         <ul class="text-sm text-stone-600 space-y-1">
-          <li>✔ Tout le citoyen</li>
-          <li>✔ Valider / trier les contributions</li>
-          <li>✔ Corriger, créer GÉT & sous-bulles</li>
-          <li>✔ Modérer (supprimer du contenu indésirable)</li>
+          <li>✔ Tout l'inscrit</li>
+          <li>✔ Confirmer, contester, nuancer une information</li>
+        </ul>
+      </div>
+      <div class="bg-white rounded-2xl border border-emerald-200 p-4">
+        <div class="text-2xl mb-1">📺</div><div class="text-lg font-black">Membre d'un GÉT</div>
+        <div class="text-xs font-bold uppercase text-emerald-500 mb-2">travaux en cours</div>
+        <ul class="text-sm text-stone-600 space-y-1">
+          <li>✔ Tout le vérificateur</li>
+          <li>✔ Accès aux travaux du Groupe d'Étude &amp; de Travail avant publication</li>
+        </ul>
+      </div>
+      <div class="bg-white rounded-2xl border border-indigo-200 p-4">
+        <div class="text-2xl mb-1">🛡️</div><div class="text-lg font-black">Éditeur · modérateur</div>
+        <div class="text-xs font-bold uppercase text-indigo-500 mb-2">modération</div>
+        <ul class="text-sm text-stone-600 space-y-1">
+          <li>✔ Tout le membre GÉT</li>
+          <li>✔ Valider ou refuser une contribution</li>
+          <li>✔ Arbitrer un désaccord</li>
+        </ul>
+      </div>
+      <div class="bg-stone-900 text-white rounded-2xl p-4">
+        <div class="text-2xl mb-1">🗄️</div><div class="text-lg font-black">Administrateur</div>
+        <div class="text-xs font-bold uppercase text-stone-400 mb-2">direction du site</div>
+        <ul class="text-sm text-stone-300 space-y-1">
+          <li>✔ Tout l'éditeur</li>
+          <li>✔ Créer, fusionner, archiver des bulles</li>
+          <li>✔ Gérer les droits</li>
         </ul>
       </div>
     </div>
@@ -90,10 +113,10 @@
       <div class="border-t border-stone-100 pt-3 mt-2">
         <p class="text-xs text-stone-500 mb-2">Pour <b>essayer un rôle</b> sans créer de compte (comptes de démo) :</p>
         <div class="flex flex-wrap gap-2">
-          <button class="demo-role bg-stone-100 text-xs font-bold px-4 py-2 rounded-xl hover:bg-stone-200 transition cursor-pointer" data-pseudo="tessa.citoyen" data-pass="demoCitoyen123">✍️ Se connecter Citoyen</button>
-          <button class="demo-role bg-amber-100 text-stone-700 text-xs font-bold px-4 py-2 rounded-xl hover:bg-amber-200 transition cursor-pointer" data-pseudo="tessa.moderateur" data-pass="demoMod123">🛡️ Se connecter Modérateur</button>
+          <button class="demo-role bg-stone-100 text-xs font-bold px-4 py-2 rounded-xl hover:bg-stone-200 transition cursor-pointer" data-pseudo="tessa.citoyen" data-pass="demoCitoyen123">✍️ Compte inscrit · contributeur</button>
+          <button class="demo-role bg-indigo-100 text-indigo-800 text-xs font-bold px-4 py-2 rounded-xl hover:bg-indigo-200 transition cursor-pointer" data-pseudo="tessa.moderateur" data-pass="demoMod123">🛡️ Compte éditeur · modérateur</button>
         </div>
-        <p class="text-[11px] text-stone-400 mt-2">Mode démo : les permissions ne sont pas encore bloquées ici ; elles se verront via le rôle affiché. (Créer un compte crée un rôle <b>citoyen</b>.)</p>
+        <p class="text-[11px] text-stone-400 mt-2">Mode démo : l'échelle complète (vérificateur, membre GÉT, administrateur) est décrite ci-dessus ; les deux comptes de test exposent ici l'entrée « inscrit » et le niveau « éditeur ». Les permissions réelles se voient par le rôle affiché quand on est connecté. (Créer un compte produit un rôle <b>inscrit</b>.)</p>
       </div>
     </div>
   </main>
@@ -110,14 +133,17 @@
       const r=await fetch(API+'/rest/v1/rpc/'+fn,{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify(body)});
       return r.json();
     }
+    function labelRole(r){ r=(r||'citoyen').toLowerCase();
+      const map={citoyen:'Inscrit · contributeur',contributeur:'Inscrit · contributeur',verificateur:'Vérificateur',membre:'Membre d\'un GÉT',moderateur:'Éditeur · modérateur',editeur:'Éditeur · modérateur',admin:'Administrateur',administrateur:'Administrateur'};
+      return map[r]||r.charAt(0).toUpperCase()+r.slice(1); }
     function majUI(){
       const c=getCompte(); const hd=document.getElementById('header-etat');
       const logged=document.getElementById('logged'), auth=document.getElementById('auth');
       if(c){
         logged.classList.remove('hidden'); auth.classList.add('hidden');
         document.getElementById('lbl-pseudo').textContent=c.pseudo;
-        document.getElementById('lbl-role').textContent = c.role||'citoyen';
-        if(hd){ hd.classList.remove('hidden'); hd.textContent='👤 '+c.pseudo+' · '+(c.role||'citoyen'); }
+        document.getElementById('lbl-role').textContent = labelRole(c.role||'citoyen');
+        if(hd){ hd.classList.remove('hidden'); hd.textContent='👤 '+c.pseudo+' · '+labelRole(c.role||'citoyen'); }
       } else {
         logged.classList.add('hidden'); auth.classList.remove('hidden');
         if(hd) hd.classList.add('hidden');
