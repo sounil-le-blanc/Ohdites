@@ -308,9 +308,11 @@
         const cartes=(tudo||[]).filter(e=>!e.parent_id && (e.type==='confirm'||e.type==='contest'));
         const confirms=cartes.filter(e=>e.type==='confirm').length;
         const contests=cartes.filter(e=>e.type==='contest').length;
-        // calculer le statut
+        // calculer le statut (règle de nuance : si des deux côtés, c'est 'nuancé' —
+        // cohérent avec la promesse "croiser les faits, pas trancher" du PDF)
         let statut='proposee';
-        if(contests>0) statut='contestee';
+        if(confirms>0 && contests>0) statut='nuanacee';
+        else if(contests>0) statut='contestee';
         else if(confirms>=2) statut='confirmee';
         else if(confirms>=1) statut='a_verifier';
         await api('PATCH','/rest/v1/affirmations?id=eq.'+encodeURIComponent(affId),{confirmations:confirms,contestations:contests,statut,commentaire:null});
